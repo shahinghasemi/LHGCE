@@ -3,6 +3,7 @@ from autoencoder import trainAutoEncoders
 from prepareData import prepareData
 import numpy as np
 from FNN import trainFNN
+from sklearn.metrics import accuracy_score
 
 EMBEDDING_DEM = 32
 N_DRUGS = 269
@@ -14,6 +15,7 @@ N_INTERACTIONS = 18416
 N_NON_INTERACTIONS = 142446
 N_BATCHSIZE = 1000
 FOLDS = 5
+THRESHOLD = 0.50
 
 def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, nonInteractionIndices):
     # To be dividable by 5
@@ -86,9 +88,17 @@ def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, non
         XTest = np.hstack((allDataTesting[0], allDataTesting[1], allDataTesting[2], allDataTesting[3]))
         YTest = np.array(YTest)
 
-        y_pred = trainedModel(torch.tensor(XTest).float()).detach().numpy()
+        y_pred_prob = trainedModel(torch.tensor(XTest).float()).detach().numpy()
+        y_pred = [] 
+        for prob in y_pred_prob:
+            if prob >= THRESHOLD:
+                y_pred.append([1])
+            else: 
+                y_pred.append([0])
+
         y_pred = np.array(y_pred)
-        print(y_pred, y_pred.shape)
+        acc = accuracy_score(YTest, y_pred)
+        print(acc)
 
 def main():
     drugSimDic = prepareData()
