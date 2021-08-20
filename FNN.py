@@ -14,12 +14,17 @@ class FCNN(nn.Module):
         self.lin5 = nn.Linear(4, 1)
         self.rel = nn.ReLU()
         self.sig = nn.Sigmoid()
+        self.dropout = nn.Dropout(0.3)
 
     def forward(self, x):
         x = self.rel(self.lin1(x))
+        x = self.dropout(x)
         x = self.rel(self.lin2(x))
+        x = self.dropout(x)
         x = self.rel(self.lin3(x))
+        x = self.dropout(x)
         x = self.rel(self.lin4(x))
+        x = self.dropout(x)
         x = self.sig(self.lin5(x))
         return x
 
