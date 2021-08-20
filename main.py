@@ -86,7 +86,7 @@ def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, non
         XTest = np.hstack((allDataTesting[0], allDataTesting[1], allDataTesting[2], allDataTesting[3]))
         YTest = np.array(YTest)
 
-        y_pred = trainedModel(torch.tensor(XTest).float())
+        y_pred = trainedModel(torch.tensor(XTest).float()).detach().numpy()
         y_pred = np.array(y_pred)
         print(y_pred, y_pred.shape)
 
