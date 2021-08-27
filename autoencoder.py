@@ -44,14 +44,14 @@ class AutoEncoder(nn.Module):
         return x;
 
 
-def trainAutoEncoders(concatenatedData, nFeatures, nEpochs, nInteractions, nBatchsize):
+def trainAutoEncoders(concatenatedData, nFeatures, nEpochs, nBatchsize):
     model = AutoEncoder(nFeatures)
     MSELoss = nn.MSELoss()
     optimizer = optim.Adam(model.parameters())
     np.random.shuffle(concatenatedData)
 
     for epoch in range(nEpochs):
-        for iter in range(0, nInteractions, nBatchsize):
+        for iter in range(0, len(concatenatedData), nBatchsize):
             batchedData = torch.tensor(concatenatedData[iter:iter + nBatchsize]).float()
             y_pred = model(batchedData)
             l = MSELoss(y_pred, batchedData)

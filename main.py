@@ -19,33 +19,41 @@ THRESHOLD = 0.50
 
 def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, nonInteractionIndices):
     # To be dividable by 5
-    index = np.arange(N_INTERACTIONS - 1)
-    np.random.shuffle(index)
-    index = index.reshape(FOLDS, N_INTERACTIONS // FOLDS)
+    totalInteractionIndex = np.arange(N_INTERACTIONS - 1)
+    totalNonInteractionIndex = np.arange(N_NON_INTERACTIONS - 1)
+
+    np.random.shuffle(totalInteractionIndex)
+    np.random.shuffle(totalNonInteractionIndex)
+
+    totalInteractionIndex = totalInteractionIndex.reshape(FOLDS, N_INTERACTIONS // FOLDS)
+    totalNonInteractionIndex = totalNonInteractionIndex.reshape(FOLDS, N_NON_INTERACTIONS // FOLDS)
 
     for k in range(FOLDS):
-        testInteractionsIndex = index[k]
-        trainInteractionsIndex = np.setdiff1d(index.flatten(), testInteractionsIndex, assume_unique=True)
+        testInteractionsIndex = totalInteractionIndex[k]
+        trainInteractionsIndex = np.setdiff1d(totalInteractionIndex.flatten(), testInteractionsIndex, assume_unique=True)
+
+        testNonInteractionsIndex = totalNonInteractionIndex[k]
+        trainNonInteractionsIndex = np.setdiff1d(totalNonInteractionIndex.flatten(), testNonInteractionsIndex, assume_unique=True)
 
         allDataTraining = []
         allDataTesting = []
         for drugFeature in DRUG_FEATURES:
             XTrain = []
             YTrain = []
-            for drugIndex, diseaseIndex in interactionIndices[trainInteractionsIndex]:
+            for drugIndex, diseaseIndex in totalInteractionIndex[trainInteractionsIndex]:
                 drug = drugSimDic[drugFeature][drugIndex]
                 disease = diseaseSim[diseaseIndex]
                 XTrain.append(np.hstack((drug, disease)))
                 YTrain.append([1])
 
-            # For encoders we only use interactions data
-            trainedAutoEncoder = trainAutoEncoders(XTrain, N_FEATURES, N_EPOCHS, trainInteractionsIndex.shape[0], N_BATCHSIZE)
-            
-            for drugIndex, diseaseIndex in nonInteractionIndices:
+            for drugIndex, diseaseIndex in totalNonInteractionIndex[trainNonInteractionsIndex]:
                 drug = drugSimDic[drugFeature][drugIndex]
                 disease = diseaseSim[diseaseIndex]
                 XTrain.append(np.hstack((drug, disease)))
                 YTrain.append([0])
+
+            # For encoders we only use interactions data
+            trainedAutoEncoder = trainAutoEncoders(XTrain, N_FEATURES, N_EPOCHS, N_BATCHSIZE)
 
             XTrain = np.array(XTrain)
             featureEmbeddings = []
@@ -71,7 +79,7 @@ def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, non
                 XTest.append(np.hstack((drug, disease)))
                 YTest.append([1])
 
-            for drugIndex, diseaseIndex in nonInteractionIndices:
+            for drugIndex, diseaseIndex in totalNonInteractionIndex[testNonInteractionsIndex]:
                 drug = drugSimDic[drugFeature][drugIndex]
                 disease = diseaseSim[diseaseIndex]
                 XTest.append(np.hstack((drug, disease)))
