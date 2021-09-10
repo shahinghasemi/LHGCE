@@ -31,9 +31,11 @@ def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, non
     for k in range(FOLDS):
         testInteractionsIndex = totalInteractionIndex[k]
         trainInteractionsIndex = np.setdiff1d(totalInteractionIndex.flatten(), testInteractionsIndex, assume_unique=True)
+        print('trainInteractionsIndex: ', trainInteractionsIndex.shape)
 
         testNonInteractionsIndex = totalNonInteractionIndex[k]
         trainNonInteractionsIndex = np.setdiff1d(totalNonInteractionIndex.flatten(), testNonInteractionsIndex, assume_unique=True)
+        print('trainNonInteractionsIndex: ', trainNonInteractionsIndex.shape)
 
         allDataTraining = []
         allDataTesting = []
@@ -52,7 +54,6 @@ def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, non
                 XTrain.append(np.hstack((drug, disease)))
                 YTrain.append([0])
 
-            # For encoders we only use interactions data
             trainedAutoEncoder = trainAutoEncoders(XTrain, N_FEATURES, N_EPOCHS, N_BATCHSIZE)
 
             XTrain = np.array(XTrain)
@@ -63,7 +64,7 @@ def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, non
                 featureEmbeddings.append(embedding)
 
             allDataTraining.append(featureEmbeddings)
-        
+
         XTrain = np.hstack((allDataTraining[0], allDataTraining[1], allDataTraining[2], allDataTraining[3]))
         YTrain = np.array(YTrain)
         dataTrain = np.hstack((XTrain, YTrain))
@@ -90,15 +91,15 @@ def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, non
             for i in range(len(XTest)):
                 embedding = trainedAutoEncoder.encode(torch.tensor(XTest[i]).float(), True)
                 featureEmbeddings.append(embedding)
-            
+
             allDataTesting.append(featureEmbeddings)
 
         XTest = np.hstack((allDataTesting[0], allDataTesting[1], allDataTesting[2], allDataTesting[3]))
         YTest = np.array(YTest)
-
         y_pred_prob = trainedModel(torch.tensor(XTest).float()).detach().numpy()
         metrics = calculateMetric(y_pred_prob, YTest, THRESHOLD)
-        print('metrics: ', metrics)
+
+		print('metrics: ', metrics)
 
 
 def main():
@@ -113,5 +114,5 @@ def main():
     # models = trainAutoEncoders(mixedData,N_DRUG_FEATURES, N_FEATURES, N_EPOCHS, N_INTERACTIONS, N_BATCHSIZE)
     results = crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, nonInteractionIndices)
 
-    
+
 main()

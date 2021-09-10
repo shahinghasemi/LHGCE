@@ -37,20 +37,27 @@ def trainFNN(data, nFeatures, nEpochs, nBatchsize):
     np.random.shuffle(data)
 
     for epoch in range(nEpochs):
-        for iter in range(0, len(data), nBatchsize):
-            batchedData = torch.tensor(data[iter:iter + nBatchsize]).float()
+        for boundary in range(0, len(data), nBatchsize):
+            batchedData = torch.tensor(data[boundary:boundary + nBatchsize]).float()
             X = batchedData[:, :-1]
             Y = []
             for y in batchedData[:, -1]:
                 Y.append([y])
             Y = torch.tensor(Y).float()
             y_pred = model(X)
+            weights = []
+            for y in Y:
+                if y == 1:
+                    weights.append(0.89)
+                else:
+                    weights.append(0.11)
+            BCELoss.weight = torch.tensor(weights, dtype=torch.float64)
             l = BCELoss(y_pred, Y)
             optimizer.zero_grad()
             l.backward()
             optimizer.step()
-        if epoch % 10 == 0:
+        if epoch % 5 == 0:
             print('epoch: ', epoch, 'loss: ', l)
-    
+
     model.train(False)
     return model

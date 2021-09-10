@@ -18,12 +18,12 @@ class AutoEncoder(nn.Module):
         self.reconstructed = nn.Linear(512, input)
         self.rel = nn.ReLU()
         # dropout, batch normalization
-    
+
     def forward(self, x):
         x = self.encode(x)
         x = self.decode(x)
         return x
-    
+
     def encode(self, x, convertToNumpy=False):
         x = self.rel(self.en_1(x))
         x = self.rel(self.en_2(x))
@@ -51,15 +51,15 @@ def trainAutoEncoders(concatenatedData, nFeatures, nEpochs, nBatchsize):
     np.random.shuffle(concatenatedData)
 
     for epoch in range(nEpochs):
-        for iter in range(0, len(concatenatedData), nBatchsize):
-            batchedData = torch.tensor(concatenatedData[iter:iter + nBatchsize]).float()
+        for boundary in range(0, len(concatenatedData), nBatchsize):
+            batchedData = torch.tensor(concatenatedData[boundary:boundary + nBatchsize]).float()
             y_pred = model(batchedData)
             l = MSELoss(y_pred, batchedData)
             optimizer.zero_grad()
             l.backward()
             optimizer.step()
-        if epoch % 10 == 0:
+        if epoch % 5 == 0:
             print('epoch: ', epoch, 'loss: ', l)
-    
+
     model.train(False)
     return model
