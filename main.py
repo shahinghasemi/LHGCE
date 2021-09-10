@@ -99,7 +99,7 @@ def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, non
         y_pred_prob = trainedModel(torch.tensor(XTest).float()).detach().numpy()
         metrics = calculateMetric(y_pred_prob, YTest, THRESHOLD)
 
-		print('metrics: ', metrics)
+        print('metrics: ', metrics)
 
 
 def main():
