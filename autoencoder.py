@@ -44,8 +44,8 @@ class AutoEncoder(nn.Module):
         return x;
 
 
-def trainAutoEncoders(concatenatedData, nFeatures, nEpochs, nBatchsize):
-    model = AutoEncoder(nFeatures)
+def trainAutoEncoders(concatenatedData, nEpochs, nBatchsize):
+    model = AutoEncoder(concatenatedData.shape[1])
     MSELoss = nn.MSELoss()
     optimizer = optim.Adam(model.parameters())
     np.random.shuffle(concatenatedData)
