@@ -8,7 +8,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Options')
 parser.add_argument('--emb', help='auto-encoder embedding size',type=int, default=32)
-parser.add_argument('--feature-list', help='the feature list to include',action='extend', type=str, nargs="+")
+parser.add_argument('--feature-list', help='the feature list to include', type=str, nargs="+")
 parser.add_argument('--folds', help='number of folds for cross-validation',type=int,  default=5)
 parser.add_argument('--threshold', help='accuracy threshold',type=float,  default=0.5)
 parser.add_argument('--batch-auto', help='batch-size for auto-encoder',type=int, default=1000)
@@ -90,9 +90,7 @@ def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, non
             else:
                 XTrain = np.hstack((XTrain, allFeatureEmbeddings_train[i]))
     
-        print('involvedDiseases.shape; ', np.array(involvedDiseases).shape)
         XTrain = np.hstack((XTrain, involvedDiseases))
-        print('XTrain.shape; ', XTrain.shape)
         YTrain = np.array(YTrain)
         dataTrain = np.hstack((XTrain, YTrain))
         trainedModel = trainFNN(dataTrain, N_EPOCHS_MODEL, N_BATCHSIZE_MODEL, DROPOUT)
@@ -133,7 +131,6 @@ def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, non
                 XTest = np.hstack((XTest, allFeatureEmbeddings_test[i]))
 
         XTest = np.hstack((XTest, involvedDiseases))
-        print('XTest.shape; ', XTest.shape)
         YTest = np.array(YTest)
         y_pred_prob = trainedModel(torch.tensor(XTest).float()).detach().numpy()
         metrics = calculateMetric(y_pred_prob, YTest, THRESHOLD)
