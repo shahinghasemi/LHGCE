@@ -6,19 +6,29 @@ from FNN import trainFNN
 from metrics import calculateMetric
 import argparse
 
+parser = argparse.ArgumentParser(description='Options')
 
-EMBEDDING_DEM = 32
-N_DRUGS = 269
-N_DISEASES = 598
-FEATURE_LIST = ['structure', 'target', 'enzyme', 'pathway']
+parser.add_argument('--emb', help='auto-encoder embedding size',type=int, default=32)
+parser.add_argument('--feature-list', help='the feature list to include',  choices=['structure', 'target', 'enzyme', 'pathway'], default=['structure', 'target', 'enzyme', 'pathway'])
+parser.add_argument('--folds', help='number of folds for cross-validation',type=int,  default=5)
+parser.add_argument('--threshold', help='accuracy threshold',type=float,  default=0.5)
+parser.add_argument('--batch-auto', help='batch-size for auto-encoder',type=int, default=1000)
+parser.add_argument('--batch-model', help='batch-size for DNN',type=int, default=1000)
+parser.add_argument('--epoch-auto', help='number of epochs to train in auto-encoder',type=int, default=20)
+parser.add_argument('--epoch-model', help='number of epochs to train in model',type=int, default=20)
+
+args = parser.parse_args()
+
+EMBEDDING_DEM = args.emb
+FEATURE_LIST = args.feature_list
 N_INTERACTIONS = 18416
 N_NON_INTERACTIONS = 142446
-FOLDS = 5
-THRESHOLD = 0.50
-N_EPOCHS_AUTO=20
-N_EPOCHS_MODEL=20
-N_BATCHSIZE_MODEL=1000
-N_BATCHSIZE_AUTO=1000
+N_EPOCHS_AUTO = args.epoch_auto
+N_EPOCHS_MODEL = args.epoch_model
+N_BATCHSIZE_MODEL = args.batch_model
+N_BATCHSIZE_AUTO = args.batch_auto
+FOLDS = args.folds
+THRESHOLD = args.threshold
 
 def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, nonInteractionIndices):
     # To be dividable by 5
@@ -105,29 +115,6 @@ def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, non
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Options')
-
-    parser.add_argument('--emb', help='auto-encoder embedding size',type=int, default=32)
-    parser.add_argument('--feature-list', help='the feature list to include',  choices=['structure', 'target', 'enzyme', 'pathway'], default=['structure', 'target', 'enzyme', 'pathway'])
-    parser.add_argument('--folds', help='number of folds for cross-validation',type=int,  default=5)
-    parser.add_argument('--threshold', help='accuracy threshold',type=float,  default=0.5)
-    parser.add_argument('--batch-auto', help='batch-size for auto-encoder',type=int, default=1000)
-    parser.add_argument('--batch-model', help='batch-size for DNN',type=int, default=1000)
-    parser.add_argument('--epoch-auto', help='number of epochs to train in auto-encoder',type=int, default=20)
-    parser.add_argument('--epoch-model', help='number of epochs to train in model',type=int, default=20)
-
-    
-    args = parser.parse_args()
-
-    EMBEDDING_DEM = args.emb
-    FEATURE_LIST = args.feature_list
-    N_EPOCHS_AUTO = args.epoch_auto
-    N_EPOCHS_MODEL = args.epoch_model
-    N_BATCHSIZE_MODEL = args.batch_model
-    N_BATCHSIZE_AUTO = args.batch_auto
-    FOLDS = args.folds
-    THRESHOLD = args.threshold
-
     drugSimDic = prepareData()
 
     # read the interactions matrix
@@ -136,6 +123,5 @@ def main():
     interactionIndices = np.array(np.mat(np.where(drugDisease == 1)).T) #(18416, 2)
     nonInteractionIndices = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
     results = crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, nonInteractionIndices)
-
 
 main()
