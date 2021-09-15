@@ -5,7 +5,7 @@ from torch.nn.modules import loss
 
 
 class FCNN(nn.Module):
-    def __init__(self, input):
+    def __init__(self, input, dropout):
         super(FCNN, self).__init__()
         self.lin1 = nn.Linear(input, 64)
         self.lin2 = nn.Linear(64, 32)
@@ -14,7 +14,7 @@ class FCNN(nn.Module):
         self.lin5 = nn.Linear(4, 1)
         self.rel = nn.ReLU()
         self.sig = nn.Sigmoid()
-        self.dropout = nn.Dropout(0.3)
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
         x = self.rel(self.lin1(x))
@@ -28,8 +28,9 @@ class FCNN(nn.Module):
         x = self.sig(self.lin5(x))
         return x
 
-def trainFNN(data, nFeatures, nEpochs, nBatchsize):
-    model = FCNN(nFeatures)
+def trainFNN(data, nEpochs, nBatchsize, dropout):
+    # data.shape[1] contains the label too 
+    model = FCNN(data.shape[1] -1 , dropout)
     # should add weighted loss
     BCELoss = nn.BCELoss()
     optimizer = optim.Adam(model.parameters())

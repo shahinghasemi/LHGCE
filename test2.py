@@ -1,4 +1,5 @@
-from sklearn.metrics import accuracy_score, roc_curve, auc
+import numpy as np 
 
-acc = accuracy_score([[1], [1], [0]], [[1], [0], [0]])
-print(acc)
+XTrain = np.empty([0, 3])
+
+XTrain = np.hstack((XTrain, [[1, 2, 3], [4, 5, 6], [7, 8, 9]]))

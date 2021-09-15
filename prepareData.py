@@ -35,15 +35,15 @@ def prepareData():
     pathway = np.loadtxt('./data/pathway_feature_matrix.txt')
 
     # read disease similarity feature
-    diseaseSim = np.loadtxt('./data/dis_sim.csv', delimiter=',')
+    # diseaseSim = np.loadtxt('./data/dis_sim.csv', delimiter=',')
     # read the interactions matrix
-    drugDisease = np.loadtxt('./data/drug_dis.csv', delimiter=',')
+    # drugDisease = np.loadtxt('./data/drug_dis.csv', delimiter=',')
 
     # compute Jaccard similarity for each drug feature
-    structureSim = Jaccard(structure)
-    targetSim = Jaccard(target)
-    enzymeSim = Jaccard(enzyme)
-    pathwaySim = Jaccard(pathway)
+    # structureSim = Jaccard(structure)
+    # targetSim = Jaccard(target)
+    # enzymeSim = Jaccard(enzyme)
+    # pathwaySim = Jaccard(pathway)
 
     # the pair indices of the interactions [[drugIndex, diseaseIndex], [] ... []]
     # interactionIndices = np.array(np.mat(np.where(drugDisease == 1)).T)
@@ -63,8 +63,8 @@ def prepareData():
     # return an array of shape (nOfDrugsFeatures, nOfInteractions, 269 + 598) -> (4, 18416, 867) for interactionData
     # return an array of shape (nOfDrugsFeatures, nOfNonInteractions, 269 + 598) -> (4, 142446, 867) for interactionData
     return {
-        'structure': structureSim,
-        'target': targetSim,
-        'enzyme': enzymeSim,
-        'pathway': pathwaySim
+        'structure': structure,
+        'target': target,
+        'enzyme': enzyme,
+        'pathway': pathway
     }
