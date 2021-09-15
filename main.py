@@ -137,7 +137,6 @@ def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, non
 
         print('metrics: ', metrics)
 
-
 def main():
     drugSimDic = prepareData()
 

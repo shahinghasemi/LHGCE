@@ -46,13 +46,13 @@ def trainFNN(data, nEpochs, nBatchsize, dropout):
                 Y.append([y])
             Y = torch.tensor(Y).float()
             y_pred = model(X)
-            weights = []
-            for y in Y:
-                if y == 1:
-                    weights.append([0.89])
-                else:
-                    weights.append([0.11])
-            BCELoss.weight = torch.tensor(weights, dtype=torch.float64)
+            # weights = []
+            # for y in Y:
+            #     if y == 1:
+            #         weights.append([0.89])
+            #     else:
+            #         weights.append([0.11])
+            # BCELoss.weight = torch.tensor(weights, dtype=torch.float64)
             l = BCELoss(y_pred, Y)
             optimizer.zero_grad()
             l.backward()

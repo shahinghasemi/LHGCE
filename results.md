@@ -1,4 +1,4 @@
-| condition | acc | auc |
-|-----------|-----|-----|
-|for encoders, train interactions are only used, for DNN trained interactions and all the nonInteractions   | 0.037 | 0.5 |
-| used an equal division of interactions and nonInteractions in encoder and DNN, what was weird is the acc is the same in all folds!!| 0.885 | 0.48 |
+| description | emb | feature_list | folds | threshold | batch-auto | batch-model | epoch-auto | epoch-model | dropout | accuracy | auc | f1 |
+|-------------|-----|--------------|-------|-----------|------------|-------------|------------|-------------|---------|----------|-----|----|
+| without batch-normalization | 32 | ["structure", "target", "enzyme", "pathway"] | 5 | 0.5 | 1000 | 1000 | 10 | 10 | 0.4 | 12% | 51% | - |
+| - | 32 | ["structure", "target", "enzyme", "pathway"] | 5 | 0.3 | 64 | 64 | 1000 | 1000 | 0.4 | 11% | 47% ||
