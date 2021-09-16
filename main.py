@@ -17,7 +17,7 @@ parser.add_argument('--epoch-auto', help='number of epochs to train in auto-enco
 parser.add_argument('--epoch-model', help='number of epochs to train in model',type=int, default=20)
 parser.add_argument('--dropout', help='dropout probability for DNN',type=float, default=0.3)
 args = parser.parse_args()
-
+print(args)
 EMBEDDING_DEM = args.emb
 FEATURE_LIST = args.feature_list
 N_INTERACTIONS = 18416
