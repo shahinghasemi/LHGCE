@@ -36,12 +36,12 @@ class FCNN(nn.Module):
         x = self.sig(self.lin5(x))
         return x
 
-def trainFNN(data, nEpochs, nBatchsize, dropout):
+def trainFNN(data, nEpochs, nBatchsize, dropout, lr, weightDecay):
     # data.shape[1] contains the label too 
     model = FCNN(data.shape[1] -1 , dropout)
     # should add weighted loss
     BCELoss = nn.BCELoss()
-    optimizer = optim.Adam(model.parameters())
+    optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=weightDecay)
 
     np.random.shuffle(data)
 

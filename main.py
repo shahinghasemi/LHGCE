@@ -16,6 +16,8 @@ parser.add_argument('--batch-model', help='batch-size for DNN',type=int, default
 parser.add_argument('--epoch-auto', help='number of epochs to train in auto-encoder',type=int, default=20)
 parser.add_argument('--epoch-model', help='number of epochs to train in model',type=int, default=20)
 parser.add_argument('--dropout', help='dropout probability for DNN',type=float, default=0.3)
+parser.add_argument('--lr-model', help='learning rate for DNN',type=float, default=0.001)
+parser.add_argument('--weight-decay-model', help='weight decay value for DNN optimizer',type=float, default=0.3)
 args = parser.parse_args()
 print(args)
 EMBEDDING_DEM = args.emb
@@ -29,6 +31,8 @@ N_BATCHSIZE_AUTO = args.batch_auto
 FOLDS = args.folds
 THRESHOLD = args.threshold
 DROPOUT = args.dropout
+LEARNING_RATE_MODEL = args.lr_model
+WEIGHT_DECAY_MODEL = args.weight_decay_model
 
 def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, nonInteractionIndices):
     # To be dividable by 5
@@ -93,7 +97,7 @@ def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, non
         XTrain = np.hstack((XTrain, involvedDiseases))
         YTrain = np.array(YTrain)
         dataTrain = np.hstack((XTrain, YTrain))
-        trainedModel = trainFNN(dataTrain, N_EPOCHS_MODEL, N_BATCHSIZE_MODEL, DROPOUT)
+        trainedModel = trainFNN(dataTrain, N_EPOCHS_MODEL, N_BATCHSIZE_MODEL, DROPOUT, LEARNING_RATE_MODEL, WEIGHT_DECAY_MODEL)
 
         # TESTING
         for featureIndex in range(len(FEATURE_LIST)):
