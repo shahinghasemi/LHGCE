@@ -10,7 +10,6 @@ parser = argparse.ArgumentParser(description='Options')
 parser.add_argument('--emb', help='auto-encoder embedding size',type=int, default=32)
 parser.add_argument('--feature-list', help='the feature list to include', type=str, nargs="+")
 parser.add_argument('--folds', help='number of folds for cross-validation',type=int,  default=5)
-parser.add_argument('--threshold', help='accuracy threshold',type=float,  default=0.5)
 parser.add_argument('--batch-auto', help='batch-size for auto-encoder',type=int, default=1000)
 parser.add_argument('--batch-model', help='batch-size for DNN',type=int, default=1000)
 parser.add_argument('--epoch-auto', help='number of epochs to train in auto-encoder',type=int, default=20)
@@ -29,7 +28,6 @@ N_EPOCHS_MODEL = args.epoch_model
 N_BATCHSIZE_MODEL = args.batch_model
 N_BATCHSIZE_AUTO = args.batch_auto
 FOLDS = args.folds
-THRESHOLD = args.threshold
 DROPOUT = args.dropout
 LEARNING_RATE_MODEL = args.lr_model
 WEIGHT_DECAY_MODEL = args.weight_decay_model
