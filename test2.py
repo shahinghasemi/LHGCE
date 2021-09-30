@@ -1,12 +1,16 @@
+import numpy as np 
 
-import torch
+first = [0.2756049572320167, 0.5812566266984621, 0.2271255750553757, 0.4360313315926893, 0.7238664132500678, 0.398820597423567, 0.13469408376698833]
+second = [0.30212009330652756, 0.5803856139624778, 0.2264004484885075, 0.44240333209001614, 0.7127341840890579, 0.40745550914388007, 0.13457397723777298]
+third = [0.3621896767069603, 0.5915185007361498, 0.23820031214681664, 0.5600211363918935, 0.6008688569101276, 0.5547404261293832, 0.14854342864814069]
+fourth = [0.35338717151089927, 0.5803820638071653, 0.22931991837122112, 0.4952443118239463, 0.6559869671463481, 0.474463828144196, 0.13894639981596504]
+fifth = [0.2800689273533139, 0.5818999148410663, 0.23015797937754234, 0.49409424344150193, 0.6606027694814011, 0.4725683597177858, 0.1393550604272868]
 
-target = torch.ones([10, 64], dtype=torch.float32)  # 64 classes, batch size = 10
-print('target: ', target)
-output = torch.full([10, 64], 1.5)  # A prediction (logit)
-print('output: ', output)
-pos_weight = torch.ones([64])  # All weights are equal to 1
-print('pos_weight: ', pos_weight)
-criterion = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight)
-loss = criterion(output, target)  # -log(sigmoid(1.5))
-print('loss: ', loss)
+first = np.array(first)
+second = np.array(second)
+third = np.array(third)
+fourth = np.array(fourth)
+fifth = np.array(fifth)
+
+print((first + second + third + fourth + fifth) / 5)
+
