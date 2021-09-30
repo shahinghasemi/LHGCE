@@ -10,6 +10,8 @@ def calculateMetric(real_score, predict_score):
         sorted_predict_score_num*np.arange(1, 1000)/1000)]
     thresholds = np.mat(thresholds)
     thresholds_num = thresholds.shape[1]
+    fpr, tpr, skThresholds = roc_curve(real_score, predict_score)
+    print('sklearn thresholds: ', skThresholds, 'len:', len(skThresholds))
 
     predict_score_matrix = np.tile(predict_score, (thresholds_num, 1))
     negative_index = np.where(predict_score_matrix < thresholds.T)
