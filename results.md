@@ -7,3 +7,4 @@
 | without weighted loss in the DNN + reduced batch-size | 32 | ["structure", "target", "enzyme", "pathway"] | 5 | 0.3 | 64 | 64 | 10 | 10 | 0.4 | 0.001 |88% | 59% | - |
 | without weighted loss + DNN batch normalization + DNN weightDecay | 32 | ["structure", "target", "enzyme", "pathway"] | 5 | 0.3 | 128 | 128 | 10 | 10 | 0.4 |0.001 | 11% | 50% | - |
 | without weighted loss | 32 | ["structure", "target", "enzyme", "pathway"] | 5 | - | 64 | 64 | 10 | 10 | 0.4 | 0.001 | 48.5% | 58% | 23% | 31% | 67% | 46% | 13%
+| positive weight loss function with total/nPositives | 32 | ["structure", "target", "enzyme", "pathway"] | 5 | - | 64 | 64 | 10 | 10 | 0.4 | 0.001 | 37.8% | 55.2% | 22.1% | 26.9% | 75% | 33% | 13.3%
