@@ -97,7 +97,7 @@ def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, non
         XTrain = np.hstack((XTrain, involvedDiseases))
         YTrain = np.array(YTrain)
         dataTrain = np.hstack((XTrain, YTrain))
-        trainedModel = trainFNN(dataTrain, N_EPOCHS_MODEL, N_BATCHSIZE_MODEL, DROPOUT, LEARNING_RATE_MODEL, WEIGHT_DECAY_MODEL)
+        trainedModel = trainFNN(dataTrain, N_EPOCHS_MODEL, N_BATCHSIZE_MODEL, DROPOUT, LEARNING_RATE_MODEL)
 
         # TESTING
         for featureIndex in range(len(FEATURE_LIST)):
@@ -137,7 +137,7 @@ def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, non
         XTest = np.hstack((XTest, involvedDiseases))
         YTest = np.array(YTest)
         y_pred_prob = trainedModel(torch.tensor(XTest).float()).detach().numpy()
-        metrics = calculateMetric(y_pred_prob, YTest, THRESHOLD)
+        metrics = calculateMetric(YTest, y_pred_prob)
 
         print('metrics: ', metrics)
 

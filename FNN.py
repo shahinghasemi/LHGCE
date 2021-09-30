@@ -1,20 +1,15 @@
 import torch
 from torch import nn, optim
 import numpy as np
-from torch.nn.modules import loss
 
 
 class FCNN(nn.Module):
     def __init__(self, input, dropout):
         super(FCNN, self).__init__()
         self.lin1 = nn.Linear(input, 64)
-        self.bn1 = nn.BatchNorm1d(64)
         self.lin2 = nn.Linear(64, 32)
-        self.bn2 = nn.BatchNorm1d(32)
         self.lin3 = nn.Linear(32, 16)
-        self.bn3 = nn.BatchNorm1d(16)
         self.lin4 = nn.Linear(16, 4)
-        self.bn4 = nn.BatchNorm1d(4)
         self.lin5 = nn.Linear(4, 1)
         self.rel = nn.ReLU()
         self.sig = nn.Sigmoid()
@@ -22,26 +17,22 @@ class FCNN(nn.Module):
 
     def forward(self, x):
         x = self.rel(self.lin1(x))
-        x = self.bn1(x)
         x = self.dropout(x)
         x = self.rel(self.lin2(x))
-        x = self.bn2(x)
         x = self.dropout(x)
         x = self.rel(self.lin3(x))
-        x = self.bn3(x)
         x = self.dropout(x)
         x = self.rel(self.lin4(x))
-        x = self.bn4(x)
         x = self.dropout(x)
         x = self.sig(self.lin5(x))
         return x
 
-def trainFNN(data, nEpochs, nBatchsize, dropout, lr, weightDecay):
+def trainFNN(data, nEpochs, nBatchsize, dropout, lr):
     # data.shape[1] contains the label too 
     model = FCNN(data.shape[1] -1 , dropout)
     # should add weighted loss
     BCELoss = nn.BCELoss()
-    optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=weightDecay)
+    optimizer = optim.Adam(model.parameters(), lr=lr)
 
     np.random.shuffle(data)
 

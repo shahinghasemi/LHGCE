@@ -1,15 +1,12 @@
-import torch.nn as nn
+
 import torch
 
-loss = nn.BCELoss(reduction='none')
-x = torch.tensor([[0.1], [0.1], [0.9]], dtype=float)
-y = torch.tensor([[0], [0], [1]], dtype=float)
-goodPred = loss(x, y)
-weights = torch.tensor([[0.11], [0.11], [0.89]], dtype=float)
-final_loss = torch.mean(goodPred * weights)
-print(final_loss)
-
-loss2 = nn.BCELoss()
-loss2.weight = weights
-goodPred = loss2(x, y)
-print(final_loss)
+target = torch.ones([10, 64], dtype=torch.float32)  # 64 classes, batch size = 10
+print('target: ', target)
+output = torch.full([10, 64], 1.5)  # A prediction (logit)
+print('output: ', output)
+pos_weight = torch.ones([64])  # All weights are equal to 1
+print('pos_weight: ', pos_weight)
+criterion = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+loss = criterion(output, target)  # -log(sigmoid(1.5))
+print('loss: ', loss)
