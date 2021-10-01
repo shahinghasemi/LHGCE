@@ -53,8 +53,8 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
         autoEncoders = []
         allFeatureEmbeddings_train = []
         allFeatureEmbeddings_test = []
-        involvedDiseases = []
         for featureIndex in range(len(FEATURE_LIST)):
+            involvedDiseases = []
             XTrain = []
             YTrain = []
             for drugIndex, diseaseIndex in interactionIndices[trainInteractionsIndex]:
@@ -62,12 +62,18 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
                 XTrain.append(drug)
                 involvedDiseases.append(diseaseSim[diseaseIndex])
                 YTrain.append([1])
+            
+            interactions = len(YTrain)
+            print('train: number of interactions: ', interactions)
 
             for drugIndex, diseaseIndex in nonInteractionIndices[trainNonInteractionsIndex]:
                 drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
                 XTrain.append(drug)
                 involvedDiseases.append(diseaseSim[diseaseIndex])
                 YTrain.append([0])
+
+            nonInteractions = len(YTrain) - interactions
+            print('train: number of non-interactions: ', nonInteractions)
 
             XTrain = np.array(XTrain)
             if EMBEDDING_METHOD == 'AE':
@@ -103,11 +109,17 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
                 involvedDiseases.append(diseaseSim[diseaseIndex])
                 YTest.append([1])
 
+            interactions = len(YTrain)
+            print('test: number of interactions: ', interactions)
+
             for drugIndex, diseaseIndex in nonInteractionIndices[testNonInteractionsIndex]:
                 drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
                 XTest.append(drug)
                 involvedDiseases.append(diseaseSim[diseaseIndex])
                 YTest.append([0])
+
+            nonInteractions = len(YTrain) - interactions
+            print('test: number of non-interactions: ', nonInteractions)
 
             if EMBEDDING_METHOD == 'AE':
                 featureEmbeddings = []
