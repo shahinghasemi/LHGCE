@@ -25,46 +25,17 @@ def concatenation(drugSimilarity, diseaseSimilarity, indices):
         concatenatedData.append(np.hstack((drugSimilarity[pair[0]], diseaseSimilarity[pair[1]])))
     return concatenatedData
 
-def prepareData():
-    interactionData = []
-    nonInteractionData = []
-    # read drug similarity features
-    structure = np.loadtxt('./data/structure_feature_matrix.txt')
-    target = np.loadtxt('./data/target_feature_matrix.txt')
-    enzyme = np.loadtxt('./data/enzyme_feature_matrix.txt')
-    pathway = np.loadtxt('./data/pathway_feature_matrix.txt')
-
-    # read disease similarity feature
-    # diseaseSim = np.loadtxt('./data/dis_sim.csv', delimiter=',')
-    # read the interactions matrix
-    # drugDisease = np.loadtxt('./data/drug_dis.csv', delimiter=',')
-
-    # compute Jaccard similarity for each drug feature
-    # structureSim = Jaccard(structure)
-    # targetSim = Jaccard(target)
-    # enzymeSim = Jaccard(enzyme)
-    # pathwaySim = Jaccard(pathway)
-
-    # the pair indices of the interactions [[drugIndex, diseaseIndex], [] ... []]
-    # interactionIndices = np.array(np.mat(np.where(drugDisease == 1)).T)
-    # nonInteractionIndices = np.array(np.mat(np.where(drugDisease == 0)).T)
-
-    # concatenate the drugs data and disease data for involved pair drug-disease in interactions
-    # interactionData.append(concatenation(structureSim, diseaseSim, interactionIndices))
-    # interactionData.append(concatenation(targetSim, diseaseSim, interactionIndices))
-    # interactionData.append(concatenation(enzymeSim, diseaseSim, interactionIndices))
-    # interactionData.append(concatenation(pathwaySim, diseaseSim, interactionIndices))
-
-    # nonInteractionData.append(concatenation(structureSim, diseaseSim, nonInteractionIndices))
-    # nonInteractionData.append(concatenation(targetSim, diseaseSim, nonInteractionIndices))
-    # nonInteractionData.append(concatenation(enzymeSim, diseaseSim, nonInteractionIndices))
-    # nonInteractionData.append(concatenation(pathwaySim, diseaseSim, nonInteractionIndices))
+def prepareData(featureList, embeddingMethod):
+    featureMatrixDic = {}
+    finalDic = {}
+    for feature in featureList:
+        featureMatrixDic[feature] = np.loadtxt('./data/'+ feature+ '_feature_matrix.txt')
     
-    # return an array of shape (nOfDrugsFeatures, nOfInteractions, 269 + 598) -> (4, 18416, 867) for interactionData
-    # return an array of shape (nOfDrugsFeatures, nOfNonInteractions, 269 + 598) -> (4, 142446, 867) for interactionData
-    return {
-        'structure': structure,
-        'target': target,
-        'enzyme': enzyme,
-        'pathway': pathway
-    }
+    if embeddingMethod == 'AE':
+        finalDic = featureMatrixDic;
+    elif embeddingMethod == 'jaccard':
+        for feature, matrix in featureMatrixDic.items():
+            finalDic[feature] = Jaccard(matrix)
+    # elif similarity == 'cosine':
+    
+    return finalDic

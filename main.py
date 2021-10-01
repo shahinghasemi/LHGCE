@@ -8,6 +8,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Options')
 parser.add_argument('--emb', help='auto-encoder embedding size',type=int, default=32)
+parser.add_argument('--emb-method', help='embedding method for drug features',type=int,type=str,  default='AE')
 parser.add_argument('--feature-list', help='the feature list to include', type=str, nargs="+")
 parser.add_argument('--folds', help='number of folds for cross-validation',type=int,  default=5)
 parser.add_argument('--batch-auto', help='batch-size for auto-encoder',type=int, default=1000)
@@ -26,11 +27,12 @@ N_EPOCHS_AUTO = args.epoch_auto
 N_EPOCHS_MODEL = args.epoch_model
 N_BATCHSIZE_MODEL = args.batch_model
 N_BATCHSIZE_AUTO = args.batch_auto
+EMBEDDING_METHOD = args.emb_method
 FOLDS = args.folds
 DROPOUT = args.dropout
 LEARNING_RATE_MODEL = args.lr_model
 
-def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, nonInteractionIndices):
+def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInteractionIndices):
     # To be dividable by 5
     totalInteractionIndex = np.arange(N_INTERACTIONS - 1)
     totalNonInteractionIndex = np.arange(N_NON_INTERACTIONS - 1)
@@ -51,44 +53,39 @@ def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, non
         autoEncoders = []
         allFeatureEmbeddings_train = []
         allFeatureEmbeddings_test = []
+        involvedDiseases = []
         for featureIndex in range(len(FEATURE_LIST)):
             XTrain = []
             YTrain = []
             for drugIndex, diseaseIndex in interactionIndices[trainInteractionsIndex]:
-                drug = drugSimDic[FEATURE_LIST[featureIndex]][drugIndex]
+                drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
                 XTrain.append(drug)
+                involvedDiseases.append(diseaseSim[diseaseIndex])
                 YTrain.append([1])
 
             for drugIndex, diseaseIndex in nonInteractionIndices[trainNonInteractionsIndex]:
-                drug = drugSimDic[FEATURE_LIST[featureIndex]][drugIndex]
+                drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
                 XTrain.append(drug)
+                involvedDiseases.append(diseaseSim[diseaseIndex])
                 YTrain.append([0])
 
             XTrain = np.array(XTrain)
-            autoEncoders.append(trainAutoEncoders(XTrain, N_EPOCHS_AUTO, N_BATCHSIZE_AUTO))
+            if EMBEDDING_METHOD == 'AE':
+                autoEncoders.append(trainAutoEncoders(XTrain, N_EPOCHS_AUTO, N_BATCHSIZE_AUTO))
+                XTrain = np.array(XTrain)
+                featureEmbeddings = []
+                for i in range(len(XTrain)):
+                    embedding = autoEncoders[featureIndex].encode(torch.tensor(XTrain[i]).float(), True)
+                    featureEmbeddings.append(embedding)
 
-            XTrain = np.array(XTrain)
-            featureEmbeddings = []
-            for i in range(len(XTrain)):
-                embedding = autoEncoders[featureIndex].encode(torch.tensor(XTrain[i]).float(), True)
-                featureEmbeddings.append(embedding)
-
-            allFeatureEmbeddings_train.append(featureEmbeddings)
-
-
-        involvedDiseases = []
-        for drugIndex, diseaseIndex in interactionIndices[trainInteractionsIndex]:
-            involvedDiseases.append(diseaseSim[diseaseIndex])
-
-        for drugIndex, diseaseIndex in nonInteractionIndices[trainNonInteractionsIndex]:
-            involvedDiseases.append(diseaseSim[diseaseIndex])
+                allFeatureEmbeddings_train.append(featureEmbeddings)
         
-        XTrain = []
-        for i in range(len(FEATURE_LIST)):
-            if i == 0:
-                XTrain = allFeatureEmbeddings_train[i]
-            else:
-                XTrain = np.hstack((XTrain, allFeatureEmbeddings_train[i]))
+                XTrain = []
+                for i in range(len(FEATURE_LIST)):
+                    if i == 0:
+                        XTrain = allFeatureEmbeddings_train[i]
+                    else:
+                        XTrain = np.hstack((XTrain, allFeatureEmbeddings_train[i]))
     
         XTrain = np.hstack((XTrain, involvedDiseases))
         YTrain = np.array(YTrain)
@@ -99,36 +96,33 @@ def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, non
         for featureIndex in range(len(FEATURE_LIST)):
             XTest = []
             YTest = []
+            involvedDiseases = []
             for drugIndex, diseaseIndex in interactionIndices[testInteractionsIndex]:
-                drug = drugSimDic[FEATURE_LIST[featureIndex]][drugIndex]
+                drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
                 XTest.append(drug)
+                involvedDiseases.append(diseaseSim[diseaseIndex])
                 YTest.append([1])
 
             for drugIndex, diseaseIndex in nonInteractionIndices[testNonInteractionsIndex]:
-                drug = drugSimDic[FEATURE_LIST[featureIndex]][drugIndex]
+                drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
                 XTest.append(drug)
+                involvedDiseases.append(diseaseSim[diseaseIndex])
                 YTest.append([0])
 
-            featureEmbeddings = []
-            for i in range(len(XTest)):
-                embedding = autoEncoders[featureIndex].encode(torch.tensor(XTest[i]).float(), True)
-                featureEmbeddings.append(embedding)
+            if EMBEDDING_METHOD == 'AE':
+                featureEmbeddings = []
+                for i in range(len(XTest)):
+                    embedding = autoEncoders[featureIndex].encode(torch.tensor(XTest[i]).float(), True)
+                    featureEmbeddings.append(embedding)
 
-            allFeatureEmbeddings_test.append(featureEmbeddings)
+                allFeatureEmbeddings_test.append(featureEmbeddings)
 
-        involvedDiseases = []
-        for drugIndex, diseaseIndex in interactionIndices[testInteractionsIndex]:
-            involvedDiseases.append(diseaseSim[diseaseIndex])
-
-        for drugIndex, diseaseIndex in nonInteractionIndices[testNonInteractionsIndex]:
-            involvedDiseases.append(diseaseSim[diseaseIndex])
-
-        XTest = []
-        for i in range(len(FEATURE_LIST)):
-            if i == 0:
-                XTest = allFeatureEmbeddings_test[i]
-            else:
-                XTest = np.hstack((XTest, allFeatureEmbeddings_test[i]))
+                XTest = []
+                for i in range(len(FEATURE_LIST)):
+                    if i == 0:
+                        XTest = allFeatureEmbeddings_test[i]
+                    else:
+                        XTest = np.hstack((XTest, allFeatureEmbeddings_test[i]))
 
         XTest = np.hstack((XTest, involvedDiseases))
         YTest = np.array(YTest)
@@ -138,13 +132,13 @@ def crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, non
         print('metrics: ', metrics)
 
 def main():
-    drugSimDic = prepareData()
+    drugDic = prepareData(FEATURE_LIST, EMBEDDING_METHOD)
 
     # read the interactions matrix
     drugDisease = np.loadtxt('./data/drug_dis.csv', delimiter=',')
     diseaseSim = np.loadtxt('./data/dis_sim.csv', delimiter=',')
     interactionIndices = np.array(np.mat(np.where(drugDisease == 1)).T) #(18416, 2)
     nonInteractionIndices = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
-    results = crossValidation(drugSimDic, diseaseSim, drugDisease, interactionIndices, nonInteractionIndices)
+    results = crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInteractionIndices)
 
 main()
