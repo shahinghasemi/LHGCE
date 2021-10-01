@@ -33,6 +33,7 @@ DROPOUT = args.dropout
 LEARNING_RATE_MODEL = args.lr_model
 
 def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInteractionIndices):
+    metrics = np.zeros(7)
     # To be dividable by 5
     totalInteractionIndex = np.arange(N_INTERACTIONS - 1)
     totalNonInteractionIndex = np.arange(N_NON_INTERACTIONS - 1)
@@ -64,7 +65,7 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
                 YTrain.append([1])
             
             interactions = len(YTrain)
-            print('train: number of interactions: ', interactions)
+            print('train: interactions: ', interactions)
 
             for drugIndex, diseaseIndex in nonInteractionIndices[trainNonInteractionsIndex]:
                 drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
@@ -73,7 +74,7 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
                 YTrain.append([0])
 
             nonInteractions = len(YTrain) - interactions
-            print('train: number of non-interactions: ', nonInteractions)
+            print('train: non-interactions: ', nonInteractions)
 
             XTrain = np.array(XTrain)
             if EMBEDDING_METHOD == 'AE':
@@ -110,7 +111,7 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
                 YTest.append([1])
 
             interactions = len(YTest)
-            print('test: number of interactions: ', interactions)
+            print('test: interactions: ', interactions)
 
             for drugIndex, diseaseIndex in nonInteractionIndices[testNonInteractionsIndex]:
                 drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
@@ -119,7 +120,7 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
                 YTest.append([0])
 
             nonInteractions = len(YTest) - interactions
-            print('test: number of non-interactions: ', nonInteractions)
+            print('test: non-interactions: ', nonInteractions)
 
             if EMBEDDING_METHOD == 'AE':
                 featureEmbeddings = []
@@ -139,9 +140,12 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
         XTest = np.hstack((XTest, involvedDiseases))
         YTest = np.array(YTest)
         y_pred_prob = trainedModel(torch.tensor(XTest).float()).detach().numpy()
-        metrics = calculateMetric(YTest, y_pred_prob)
 
-        print('metrics: ', metrics)
+        metric = np.array(calculateMetric(YTest, y_pred_prob))
+        metrics += metric
+        print('metric: ', metric)
+
+    return metrics
 
 def main():
     drugDic = prepareData(FEATURE_LIST, EMBEDDING_METHOD)
@@ -152,5 +156,6 @@ def main():
     interactionIndices = np.array(np.mat(np.where(drugDisease == 1)).T) #(18416, 2)
     nonInteractionIndices = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
     results = crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInteractionIndices)
+    print('results: ', results)
 
 main()
