@@ -109,7 +109,7 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
                 involvedDiseases.append(diseaseSim[diseaseIndex])
                 YTest.append([1])
 
-            interactions = len(YTrain)
+            interactions = len(YTest)
             print('test: number of interactions: ', interactions)
 
             for drugIndex, diseaseIndex in nonInteractionIndices[testNonInteractionsIndex]:
@@ -118,7 +118,7 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
                 involvedDiseases.append(diseaseSim[diseaseIndex])
                 YTest.append([0])
 
-            nonInteractions = len(YTrain) - interactions
+            nonInteractions = len(YTest) - interactions
             print('test: number of non-interactions: ', nonInteractions)
 
             if EMBEDDING_METHOD == 'AE':
