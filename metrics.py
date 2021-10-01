@@ -44,6 +44,7 @@ def calculateMetric(real_score, predict_score):
     specificity_list = TN/(TN+FP)
 
     max_index = np.argmax(f1_score_list)
+    print('TP: ', TP[max_index], 'TN: ', TN[max_index], 'FP: ', FP[max_index], 'FN: ', FN[max_index])
     f1_score = f1_score_list[max_index]
     accuracy = accuracy_list[max_index]
     specificity = specificity_list[max_index]

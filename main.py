@@ -65,7 +65,6 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
                 YTrain.append([1])
             
             interactions = len(YTrain)
-            print('train: interactions: ', interactions)
 
             for drugIndex, diseaseIndex in nonInteractionIndices[trainNonInteractionsIndex]:
                 drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
@@ -74,7 +73,7 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
                 YTrain.append([0])
 
             nonInteractions = len(YTrain) - interactions
-            print('train: non-interactions: ', nonInteractions)
+            print('train: interactions: ', interactions, 'non-interactions: ', nonInteractions)
 
             XTrain = np.array(XTrain)
             if EMBEDDING_METHOD == 'AE':
@@ -111,7 +110,6 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
                 YTest.append([1])
 
             interactions = len(YTest)
-            print('test: interactions: ', interactions)
 
             for drugIndex, diseaseIndex in nonInteractionIndices[testNonInteractionsIndex]:
                 drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
@@ -120,7 +118,7 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
                 YTest.append([0])
 
             nonInteractions = len(YTest) - interactions
-            print('test: non-interactions: ', nonInteractions)
+            print('test: interactions: ', interactions, 'non-interactions: ', nonInteractions)
 
             if EMBEDDING_METHOD == 'AE':
                 featureEmbeddings = []
