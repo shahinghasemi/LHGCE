@@ -8,7 +8,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Options')
 parser.add_argument('--emb', help='auto-encoder embedding size',type=int, default=32)
-parser.add_argument('--emb-method', help='embedding method for drug features',type=int,type=str,  default='AE')
+parser.add_argument('--emb-method', help='embedding method for drug features', type=str, default='AE')
 parser.add_argument('--feature-list', help='the feature list to include', type=str, nargs="+")
 parser.add_argument('--folds', help='number of folds for cross-validation',type=int,  default=5)
 parser.add_argument('--batch-auto', help='batch-size for auto-encoder',type=int, default=1000)
