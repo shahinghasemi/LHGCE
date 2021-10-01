@@ -156,6 +156,6 @@ def main():
     interactionIndices = np.array(np.mat(np.where(drugDisease == 1)).T) #(18416, 2)
     nonInteractionIndices = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
     results = crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInteractionIndices)
-    print('results: ', results)
+    print('results: ', results / FOLDS)
 
 main()
