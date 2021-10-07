@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.io as sio
+from sklearn.decomposition import PCA
 
 # def Cosine(matrix)
 def Jaccard(matrix):
@@ -33,9 +34,17 @@ def prepareData(featureList, embeddingMethod):
     
     if embeddingMethod == 'AE':
         finalDic = featureMatrixDic;
+
     elif embeddingMethod == 'jaccard':
         for feature, matrix in featureMatrixDic.items():
             finalDic[feature] = Jaccard(matrix)
+            
+    elif embeddingMethod == 'PCA':
+        for feature, matrix in featureMatrixDic.items():
+            pca = PCA(n_components=32)
+            transformed = pca.fit_transform(matrix)
+            finalDic[feature] = transformed
+
     # elif similarity == 'cosine':
     
     return finalDic

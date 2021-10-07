@@ -1,8 +1,10 @@
-import numpy as np
-metrics = np.zeros(7)
-metrics += np.array([1, 2, 3, 4 , 5 ,6 ,7 ])
+import torch 
 
-print(metrics)
-
-metrics += np.array([1, 2, 3, 4, 5, 6, 7])
-print(metrics)
+x = torch.tensor([1, 2, 3], dtype=float, requires_grad=True)
+y = x * x * 2
+z = 3 * x 
+loss = y + z
+print('x: ', x, 'x.grad: ', x.grad)
+print('y: ', y)
+loss.sum().backward()
+print('y after backward: ', y, 'x.grad: ', x.grad)
