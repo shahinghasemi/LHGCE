@@ -52,8 +52,7 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
         trainNonInteractionsIndex = np.setdiff1d(totalNonInteractionIndex.flatten(), testNonInteractionsIndex, assume_unique=True)
 
         autoEncoders = []
-        allFeatureEmbeddings_train = []
-        allFeatureEmbeddings_test = []
+        allFeatureEmbeddings = []
         for featureIndex in range(len(FEATURE_LIST)):
             involvedDiseases = []
             XTrain = []
@@ -76,29 +75,34 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
             print('train: interactions: ', interactions, 'non-interactions: ', nonInteractions)
 
             XTrain = np.array(XTrain)
+            featureEmbeddings = []
             if EMBEDDING_METHOD == 'AE':
                 autoEncoders.append(trainAutoEncoders(XTrain, N_EPOCHS_AUTO, N_BATCHSIZE_AUTO))
-                XTrain = np.array(XTrain)
-                featureEmbeddings = []
                 for i in range(len(XTrain)):
                     embedding = autoEncoders[featureIndex].encode(torch.tensor(XTrain[i]).float(), True)
                     featureEmbeddings.append(embedding)
+            else:
+                for i in range(len(XTrain)):
+                    embedding = XTrain[i]
+                    featureEmbeddings.append(embedding)
 
-                allFeatureEmbeddings_train.append(featureEmbeddings)
+            allFeatureEmbeddings.append(featureEmbeddings)
         
-                XTrain = []
-                for i in range(len(FEATURE_LIST)):
-                    if i == 0:
-                        XTrain = allFeatureEmbeddings_train[i]
-                    else:
-                        XTrain = np.hstack((XTrain, allFeatureEmbeddings_train[i]))
+        for i in range(len(FEATURE_LIST)):
+            if i == 0:
+                XTrain = allFeatureEmbeddings[i]
+            else:
+                # concatenating all drug's feature
+                XTrain = np.hstack((XTrain, allFeatureEmbeddings[i]))
     
+        # concatenating concatenated drugs with diseases
         XTrain = np.hstack((XTrain, involvedDiseases))
         YTrain = np.array(YTrain)
         dataTrain = np.hstack((XTrain, YTrain))
         trainedModel = trainFNN(dataTrain, N_EPOCHS_MODEL, N_BATCHSIZE_MODEL, DROPOUT, LEARNING_RATE_MODEL)
 
         # TESTING
+        allFeatureEmbeddings = []
         for featureIndex in range(len(FEATURE_LIST)):
             XTest = []
             YTest = []
@@ -120,20 +124,25 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
             nonInteractions = len(YTest) - interactions
             print('test: interactions: ', interactions, 'non-interactions: ', nonInteractions)
 
+            featureEmbeddings = []
             if EMBEDDING_METHOD == 'AE':
-                featureEmbeddings = []
+                autoEncoders.append(trainAutoEncoders(XTest, N_EPOCHS_AUTO, N_BATCHSIZE_AUTO))
                 for i in range(len(XTest)):
                     embedding = autoEncoders[featureIndex].encode(torch.tensor(XTest[i]).float(), True)
                     featureEmbeddings.append(embedding)
+            else:
+                for i in range(len(XTest)):
+                    embedding = XTest[i]
+                    featureEmbeddings.append(embedding)
 
-                allFeatureEmbeddings_test.append(featureEmbeddings)
-
-                XTest = []
-                for i in range(len(FEATURE_LIST)):
-                    if i == 0:
-                        XTest = allFeatureEmbeddings_test[i]
-                    else:
-                        XTest = np.hstack((XTest, allFeatureEmbeddings_test[i]))
+            allFeatureEmbeddings.append(featureEmbeddings)
+        
+        for i in range(len(FEATURE_LIST)):
+            if i == 0:
+                XTest = allFeatureEmbeddings[i]
+            else:
+                # concatenating all drug's feature
+                XTest = np.hstack((XTest, allFeatureEmbeddings[i]))
 
         XTest = np.hstack((XTest, involvedDiseases))
         YTest = np.array(YTest)
