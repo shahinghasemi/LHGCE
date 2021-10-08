@@ -7,7 +7,7 @@ class FCNN(nn.Module):
     def __init__(self, input, dropout):
         super(FCNN, self).__init__()
         self.lin1 = nn.Linear(input, 128)
-        self.lin2 = nn.Linear(input, 64)
+        self.lin2 = nn.Linear(129, 64)
         self.lin3 = nn.Linear(64, 32)
         self.lin4 = nn.Linear(32, 16)
         self.lin5 = nn.Linear(16, 4)
