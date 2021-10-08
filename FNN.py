@@ -31,15 +31,15 @@ class FCNN(nn.Module):
 def trainFNN(data, nEpochs, nBatchsize, dropout, lr):
     # data.shape[1] contains the label too 
     model = FCNN(data.shape[1] -1 , dropout)
+    
     # should add weighted loss
     # BCELoss = nn.BCELoss()
     BCELoss = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([0.114483222]))
 
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
-    np.random.shuffle(data)
-
     for epoch in range(nEpochs):
+        np.random.shuffle(data)
         for boundary in range(0, len(data), nBatchsize):
             batchedData = torch.tensor(data[boundary:boundary + nBatchsize]).float()
             X = batchedData[:, :-1]

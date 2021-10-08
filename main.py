@@ -31,6 +31,8 @@ EMBEDDING_METHOD = args.emb_method
 FOLDS = args.folds
 DROPOUT = args.dropout
 LEARNING_RATE_MODEL = args.lr_model
+DRUG_NUMBER = 269
+DISEASE_NUMBER = 598
 
 def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInteractionIndices):
     metrics = np.zeros(7)
@@ -155,6 +157,9 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
     return metrics
 
 def main():
+    print('nDrugs: ', DRUG_NUMBER)
+    print('nDisease: ', DISEASE_NUMBER)
+    
     drugDic = prepareData(FEATURE_LIST, EMBEDDING_METHOD)
 
     # read the interactions matrix
