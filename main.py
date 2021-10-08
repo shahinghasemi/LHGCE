@@ -79,7 +79,7 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
             XTrain = np.array(XTrain)
             featureEmbeddings = []
             if EMBEDDING_METHOD == 'AE':
-                autoEncoders.append(trainAutoEncoders(XTrain, N_EPOCHS_AUTO, N_BATCHSIZE_AUTO))
+                autoEncoders.append(trainAutoEncoders(XTrain, N_EPOCHS_AUTO, N_BATCHSIZE_AUTO, LEARNING_RATE_MODEL))
                 for i in range(len(XTrain)):
                     embedding = autoEncoders[featureIndex].encode(torch.tensor(XTrain[i]).float(), True)
                     featureEmbeddings.append(embedding)
@@ -162,11 +162,12 @@ def main():
     
     drugDic = prepareData(FEATURE_LIST, EMBEDDING_METHOD)
 
-    # read the interactions matrix
     drugDisease = np.loadtxt('./data/drug_dis.csv', delimiter=',')
     diseaseSim = np.loadtxt('./data/dis_sim.csv', delimiter=',')
+
     interactionIndices = np.array(np.mat(np.where(drugDisease == 1)).T) #(18416, 2)
     nonInteractionIndices = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
+    
     results = crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInteractionIndices)
     print('results: ', results / FOLDS)
 

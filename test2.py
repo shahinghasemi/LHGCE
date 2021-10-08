@@ -1,10 +1,3 @@
-import torch 
-
-x = torch.tensor([1, 2, 3], dtype=float, requires_grad=True)
-y = x * x * 2
-z = 3 * x 
-loss = y + z
-print('x: ', x, 'x.grad: ', x.grad)
-print('y: ', y)
-loss.sum().backward()
-print('y after backward: ', y, 'x.grad: ', x.grad)
+from sklearn.metrics import accuracy_score, f1_score, roc_curve, auc
+acc = accuracy_score([0, 0, 1, 1, 0], [0.3, 0.4, 0.1, 0.9, 0.25])
+print('acc: ', acc )
