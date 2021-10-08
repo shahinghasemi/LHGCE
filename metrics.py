@@ -43,11 +43,11 @@ def calculateMetric(real_score, predict_score):
     accuracy_list = (TP+TN)/len(real_score.T)
     specificity_list = TN/(TN+FP)
 
-    print('max f1: ', f1_score_list([np.argmax(f1_score_list)]))
-    print('max accuracy: ', accuracy_list([np.argmax(accuracy_list)]))
-    print('max recall: ', recall_list([np.argmax(recall_list)]))
-    print('max specificity: ', specificity_list([np.argmax(specificity_list)]))
-    print('max precision: ', precision_list([np.argmax(precision_list)]))
+    print('max f1: ', f1_score_list[np.argmax(f1_score_list)])
+    print('max accuracy: ', accuracy_list[np.argmax(accuracy_list)])
+    print('max recall: ', recall_list[np.argmax(recall_list)])
+    print('max specificity: ', specificity_list[np.argmax(specificity_list)])
+    print('max precision: ', precision_list[np.argmax(precision_list)])
 
     max_index = np.argmax(f1_score_list)
     print('TP: ', TP[max_index], 'TN: ', TN[max_index], 'FP: ', FP[max_index], 'FN: ', FN[max_index])
