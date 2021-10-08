@@ -7,6 +7,3 @@
 | positive weight loss function with nPositives/tota | - | ["structure", "target", "enzyme", "pathway"] | 5 | "jaccard" | - | 64 | - | 500 | 0.4 | 0.001 | 77.8% | 76.1% | 38.1% | 39.5% | 52.6% | 81.1% | 31.5%
 | positive weight loss function with nPositives/tota + PCA components=32 | - | ["structure", "target", "enzyme", "pathway"] | 5 | "PCA" | - | 64 | - | 50 | 0.4 | 0.001 | 82.3% | 79.5% | 40.7% | 37.3% | 53% | 86.1% | 33.5%
 
-[0.38189909 0.79741766 0.40791561 0.81974388 0.54276405 0.85555127 0.32879135]
-
-get back to commit before fixing the bug and see what data XTrain contains

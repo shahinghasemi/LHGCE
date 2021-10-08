@@ -34,7 +34,8 @@ def trainFNN(data, nEpochs, nBatchsize, dropout, lr):
     
     # should add weighted loss
     # BCELoss = nn.BCELoss()
-    BCELoss = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([0.114483222]))
+    # BCELoss = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([0.114483222]))
+    BCELoss = nn.BCEWithLogitsLoss()
 
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
