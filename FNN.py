@@ -6,11 +6,12 @@ import numpy as np
 class FCNN(nn.Module):
     def __init__(self, input, dropout):
         super(FCNN, self).__init__()
-        self.lin1 = nn.Linear(input, 64)
-        self.lin2 = nn.Linear(64, 32)
-        self.lin3 = nn.Linear(32, 16)
-        self.lin4 = nn.Linear(16, 4)
-        self.lin5 = nn.Linear(4, 1)
+        self.lin1 = nn.Linear(input, 128)
+        self.lin2 = nn.Linear(input, 64)
+        self.lin3 = nn.Linear(64, 32)
+        self.lin4 = nn.Linear(32, 16)
+        self.lin5 = nn.Linear(16, 4)
+        self.lin6 = nn.Linear(4, 1)
         self.rel = nn.ReLU()
         self.sig = nn.Sigmoid()
         self.dropout = nn.Dropout(dropout)
@@ -24,14 +25,15 @@ class FCNN(nn.Module):
         x = self.dropout(x)
         x = self.rel(self.lin4(x))
         x = self.dropout(x)
-        # x = self.sig(self.lin5(x))
-        x = self.lin5(x)
+        x = self.rel(self.lin5(x))
+        x = self.dropout(x)
+        x = self.lin6(x)
         return x
 
 def trainFNN(data, nEpochs, nBatchsize, dropout, lr):
     # data.shape[1] contains the label too 
     model = FCNN(data.shape[1] -1 , dropout)
-    
+
     # should add weighted loss
     # BCELoss = nn.BCELoss()
     # BCELoss = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([0.114483222]))
