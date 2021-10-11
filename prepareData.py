@@ -32,7 +32,7 @@ def prepareData(featureList, embeddingMethod):
     for feature in featureList:
         featureMatrixDic[feature] = np.loadtxt('./data/'+ feature+ '_feature_matrix.txt')
     
-    if embeddingMethod == 'AE':
+    if embeddingMethod == 'AE' or 'matrix':
         finalDic = featureMatrixDic;
 
     elif embeddingMethod == 'jaccard':

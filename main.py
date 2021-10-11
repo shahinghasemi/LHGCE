@@ -101,7 +101,7 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
         XTrain = np.hstack((XTrain, involvedDiseases))
         YTrain = np.array(YTrain)
         dataTrain = np.hstack((XTrain, YTrain))
-        trainedModel = trainFNN(dataTrain, N_EPOCHS_MODEL, N_BATCHSIZE_MODEL, DROPOUT, LEARNING_RATE_MODEL)
+        trainedModel = trainFNN(dataTrain, EMBEDDING_DEM, N_EPOCHS_MODEL, N_BATCHSIZE_MODEL, DROPOUT, LEARNING_RATE_MODEL)
 
         # TESTING
         allFeatureEmbeddings = []
