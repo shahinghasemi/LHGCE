@@ -60,8 +60,8 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
         testInteractionsIndex = totalInteractionIndex[k]
         trainInteractionsIndex = np.setdiff1d(totalInteractionIndex.flatten(), testInteractionsIndex, assume_unique=True)
 
-        testNonInteractionsIndex = totalNonInteractionIndex[k]
-        trainNonInteractionsIndex = np.setdiff1d(totalNonInteractionIndex.flatten(), testNonInteractionsIndex, assume_unique=True)
+        trainNonInteractionsIndex = totalNonInteractionIndex[k]
+        testNonInteractionsIndex = np.setdiff1d(totalNonInteractionIndex.flatten(), trainNonInteractionsIndex, assume_unique=True)
 
         allDataDic = {}
         for featureIndex in range(len(FEATURE_LIST)):

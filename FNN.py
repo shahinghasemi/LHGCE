@@ -6,6 +6,7 @@ from torch.nn.modules.container import Sequential
 class FCNN(nn.Module):
     def __init__(self, inputs, emb, dropout):
         super(FCNN, self).__init__()
+        self.numFeatures = len(inputs.keys())
 
         for name, inputDim in inputs.items():
             scopeNameEncoder = name + '_encoder'
@@ -38,7 +39,7 @@ class FCNN(nn.Module):
             setattr(self, scopeNameDecoder, decoder)
 
         self.DNN = Sequential(
-            nn.Linear( 4 * emb, 16),
+            nn.Linear( self.numFeatures * emb, 16),
             nn.BatchNorm1d(16),
             nn.ReLU(),
             nn.Dropout(dropout),
@@ -77,12 +78,12 @@ def trainFNN(dataDic, emb, nEpochs, nBatchsize, dropout, lr, featuresList, aggre
     model = FCNN(inputs, emb, dropout)
 
     # should add weighted loss
-    # BCELoss = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([0.114483222]))
     BCELoss = nn.BCEWithLogitsLoss()
-    # MSELoss = nn.MSELoss()
 
     optimizer = optim.Adam(model.parameters(), lr=lr)
+
     indices = np.arange(dataDic['labels'].shape[0])
+
     for epoch in range(nEpochs):
         np.random.shuffle(indices)
         for boundary in range(0, len(indices), nBatchsize):
