@@ -4,9 +4,10 @@ import numpy as np
 from torch.nn.modules.container import Sequential
 
 class FCNN(nn.Module):
-    def __init__(self, inputs, emb, dropout):
+    def __init__(self, inputs, emb, dropout, aggregationMode):
         super(FCNN, self).__init__()
         self.numFeatures = len(inputs.keys())
+        self.aggregationMode = aggregationMode
 
         for name, inputDim in inputs.items():
             scopeNameEncoder = name + '_encoder'
@@ -39,7 +40,7 @@ class FCNN(nn.Module):
             setattr(self, scopeNameDecoder, decoder)
 
         self.DNN = Sequential(
-            nn.Linear( self.numFeatures * emb, 16),
+            nn.Linear( self.numFeatures * emb if self.aggregationMode == 'concatenate' else emb, 16),
             nn.BatchNorm1d(16),
             nn.ReLU(),
             nn.Dropout(dropout),
@@ -75,7 +76,7 @@ def trainFNN(dataDic, emb, nEpochs, nBatchsize, dropout, lr, featuresList, aggre
         if key != 'labels' and key != 'diseases':
             inputs[key] = value.shape[1]
 
-    model = FCNN(inputs, emb, dropout)
+    model = FCNN(inputs, emb, dropout, aggregationMode)
 
     # should add weighted loss
     BCELoss = nn.BCEWithLogitsLoss()

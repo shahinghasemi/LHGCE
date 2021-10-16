@@ -60,8 +60,8 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
         testInteractionsIndex = totalInteractionIndex[k]
         trainInteractionsIndex = np.setdiff1d(totalInteractionIndex.flatten(), testInteractionsIndex, assume_unique=True)
 
-        trainNonInteractionsIndex = totalNonInteractionIndex[k]
-        testNonInteractionsIndex = np.setdiff1d(totalNonInteractionIndex.flatten(), trainNonInteractionsIndex, assume_unique=True)
+        testNonInteractionsIndex = totalNonInteractionIndex[k]
+        trainNonInteractionsIndex = np.setdiff1d(totalNonInteractionIndex.flatten(), testNonInteractionsIndex, assume_unique=True)
 
         allDataDic = {}
         for featureIndex in range(len(FEATURE_LIST)):
@@ -136,9 +136,13 @@ def main():
 
     drugDisease = np.loadtxt('./data/drug_dis.csv', delimiter=',')
     diseaseSim = np.loadtxt('./data/dis_sim.csv', delimiter=',')
+
     interactionIndices = np.array(np.mat(np.where(drugDisease == 1)).T) #(18416, 2)
     nonInteractionIndices = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
-    
+    # we want to have the same number of non interactions as interactions
+    selection = np.random.choice(NONINTERACTIONS_NUMBER, INTERACTIONS_NUMBER)
+    nonInteractionIndices = nonInteractionIndices[selection]
+
     results = crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInteractionIndices)
     print('results: ', results / FOLDS)
 
