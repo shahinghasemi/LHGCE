@@ -48,13 +48,13 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
     metrics = np.zeros(7)
     # To be dividable by 5
     totalInteractionIndex = np.arange(INTERACTIONS_NUMBER - 1)
-    totalNonInteractionIndex = np.arange(NONINTERACTIONS_NUMBER - 1)
+    totalNonInteractionIndex = np.arange(INTERACTIONS_NUMBER - 1)
 
     np.random.shuffle(totalInteractionIndex)
     np.random.shuffle(totalNonInteractionIndex)
 
     totalInteractionIndex = totalInteractionIndex.reshape(FOLDS, INTERACTIONS_NUMBER // FOLDS)
-    totalNonInteractionIndex = totalNonInteractionIndex.reshape(FOLDS, NONINTERACTIONS_NUMBER // FOLDS)
+    totalNonInteractionIndex = totalNonInteractionIndex.reshape(FOLDS, INTERACTIONS_NUMBER // FOLDS)
 
     for k in range(FOLDS):
         testInteractionsIndex = totalInteractionIndex[k]
