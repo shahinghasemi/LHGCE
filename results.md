@@ -2,5 +2,5 @@
 |-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
 | only BCEWithLogits | 32 | t,e,p,s | 5 | adam | matrix | 64 | 50 | 0.4 | 0.001 | 75.5% | 72.5% | 32.9% | 26% | 52.5% | 78.4% | 24%
 | nonInteraction 1/k instead of 4/k | 32 | t,e,p,s | 5 | adam | matrix | 64 | 50 | 0.4 | 0.001 | 85% | 72.1% | 13.9% | 14.2% | 36.5% | 86.6% | 9.1% 
-
-[0.1425323  0.72103048 0.13902422 0.85036595 0.36508281 0.86605005 0.09162082]
+|Interactions = nonInteractions| 32 | e,p,s,t | 5 | adam | matrix | 64 | 50 | 0.4 | 0.001 | 70.5% | 72.3% | 70.5% | 70.44% | 86.5% | 41.2% | 59.6%
+| all nonInteractions are used in both training and testing while 1/k of interactions are used for testing and k-1/k is used for training|
