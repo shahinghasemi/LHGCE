@@ -77,9 +77,9 @@ def trainFNN(dataDic, emb, nEpochs, nBatchsize, dropout, lr, featuresList, aggre
             inputs[key] = value.shape[1]
 
     model = FCNN(inputs, emb, dropout, aggregationMode)
-
+    posWeight = 12000 / 142000
     # should add weighted loss
-    BCELoss = nn.BCEWithLogitsLoss()
+    BCELoss = nn.BCEWithLogitsLoss(pos_weight=posWeight)
 
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
