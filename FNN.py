@@ -2,7 +2,6 @@ import torch
 from torch import nn, optim
 import numpy as np
 from torch.nn.modules.container import Sequential
-
 class FCNN(nn.Module):
     def __init__(self, inputs, emb, dropout, aggregationMode):
         super(FCNN, self).__init__()
@@ -65,6 +64,15 @@ class FCNN(nn.Module):
                 return self.enzyme_encoder(x)
             elif featureName == 'pathway':
                 return self.pathway_encoder(x)
+        elif mode == 'decoder':
+            if featureName == 'target':
+                return self.target_decoder(x)
+            elif featureName == 'structure':
+                return self.structure_decoder(x)
+            elif featureName == 'enzyme':
+                return self.enzyme_decoder(x)
+            elif featureName == 'pathway':
+                return self.pathway_decoder(x)
 
         elif mode == 'DNN':
             return self.DNN(x)
@@ -80,6 +88,7 @@ def trainFNN(dataDic, emb, nEpochs, nBatchsize, dropout, lr, featuresList, aggre
     posWeight = torch.tensor(142000 / 12000) 
     # should add weighted loss
     BCELoss = nn.BCEWithLogitsLoss(pos_weight=posWeight)
+    MSELoss = nn.MSELoss()
 
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
@@ -90,11 +99,17 @@ def trainFNN(dataDic, emb, nEpochs, nBatchsize, dropout, lr, featuresList, aggre
         for boundary in range(0, len(indices), nBatchsize):
             batchIndex = indices[boundary:boundary + nBatchsize]
             encodedDic = {}
+            decodedDic = {}
+            featureLossesDic = {}
+            batchLoss = 0
             for feature in featuresList:
                 X = torch.tensor(dataDic[feature][batchIndex]).float()
                 encoded = model(X, feature, 'encoder')
+                decoded = model(encoded, feature, 'decoder')
                 encodedDic[feature] = encoded
+                decodedDic[feature] = decoded
             
+            # DNN Input
             DnnInput = torch.tensor([], dtype=float)
             for index, key in enumerate(encodedDic):
                 if index == 0:
@@ -102,17 +117,30 @@ def trainFNN(dataDic, emb, nEpochs, nBatchsize, dropout, lr, featuresList, aggre
                 else:
                     if aggregationMode == 'concatenate':
                         DnnInput = torch.cat((DnnInput, encodedDic[key]), 1)
-        
+
+            # AE Losses
+            for index, key in enumerate(decodedDic):
+                X = torch.tensor(dataDic[key][batchIndex]).float()
+                featureLossesDic[key] = MSELoss(decodedDic[key], X)
+                batchLoss += featureLossesDic[key]
+
             Y = torch.tensor(dataDic['labels'][batchIndex]).float()
             y_pred = model(DnnInput, None, 'DNN')
 
-            loss = BCELoss(y_pred, Y)
+            dnnLoss = BCELoss(y_pred, Y) 
+            batchLoss += dnnLoss
             optimizer.zero_grad()
-            loss.backward()
+            batchLoss.backward()
             optimizer.step()
 
-        if epoch % 5 == 0:
-            print('epoch: ', epoch, 'loss: ', loss)
+        if epoch % 2 == 0:
+            print('------------------- epoch: ', epoch, ' -------------------' )
+            print('-> batchLoss: ', batchLoss.item())
+            print('-> dnnLoss: ', dnnLoss.item())
+            # AE Losses
+            for index, key in enumerate(featureLossesDic):
+                print(key, ' loss: ', featureLossesDic[key].item())
+
 
     model.eval()
     return model
