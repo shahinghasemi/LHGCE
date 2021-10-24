@@ -3,43 +3,18 @@ from torch import nn, optim
 import numpy as np
 from torch.nn.modules.container import Sequential
 class FCNN(nn.Module):
-    def __init__(self, inputs, emb, dropout, aggregationMode):
+    def __init__(self, inputsShape, dropout, aggregationMode):
         super(FCNN, self).__init__()
-        self.numFeatures = len(inputs.keys())
+        self.inputs = inputsShape
+        self.inputDim = 0
         self.aggregationMode = aggregationMode
 
-        for name, inputDim in inputs.items():
-            scopeNameEncoder = name + '_encoder'
-            scopeNameDecoder = name + '_decoder'
-            encoder = nn.Sequential(
-                nn.Linear(inputDim, 128),
-                nn.BatchNorm1d(128),
-                nn.ReLU(),
-                nn.Dropout(dropout),
-                nn.Linear(128, 64),
-                nn.BatchNorm1d(64),
-                nn.ReLU(),
-                nn.Dropout(dropout),
-                nn.Linear(64, emb),
-                nn.ReLU(),
-            )
-            decoder = nn.Sequential(
-                nn.Linear(emb, 64),
-                nn.BatchNorm1d(64),
-                nn.ReLU(),
-                nn.Dropout(dropout),
-                nn.Linear(64, 128),
-                nn.BatchNorm1d(128),
-                nn.ReLU(),
-                nn.Dropout(dropout),
-                nn.Linear(128, inputDim),
-                nn.ReLU(),
-            )
-            setattr(self, scopeNameEncoder, encoder)
-            setattr(self, scopeNameDecoder, decoder)
-
+        for featureKey, shape in self.inputs.items():
+            if self.aggregationMode == 'concatenate':
+                self.inputDim += shape
+    
         self.DNN = Sequential(
-            nn.Linear( self.numFeatures * emb if self.aggregationMode == 'concatenate' else emb, 16),
+            nn.Linear(self.inputDim, 16),
             nn.BatchNorm1d(16),
             nn.ReLU(),
             nn.Dropout(dropout),
@@ -55,75 +30,42 @@ class FCNN(nn.Module):
         )
         
     def forward(self, x, featureName, mode):
-        if mode == 'encoder':
-            if featureName == 'target':
-                return self.target_encoder(x)
-            elif featureName == 'structure':
-                return self.structure_encoder(x)
-            elif featureName == 'enzyme':
-                return self.enzyme_encoder(x)
-            elif featureName == 'pathway':
-                return self.pathway_encoder(x)
-        elif mode == 'decoder':
-            if featureName == 'target':
-                return self.target_decoder(x)
-            elif featureName == 'structure':
-                return self.structure_decoder(x)
-            elif featureName == 'enzyme':
-                return self.enzyme_decoder(x)
-            elif featureName == 'pathway':
-                return self.pathway_decoder(x)
-
-        elif mode == 'DNN':
+        if mode == 'DNN':
             return self.DNN(x)
 
 
-def trainFNN(dataDic, emb, nEpochs, nBatchsize, dropout, lr, featuresList, aggregationMode):
-    inputs = {}
-    for key, value in dataDic.items():
-        if key != 'labels' and key != 'diseases':
-            inputs[key] = value.shape[1]
+def trainFNN(dataDic, nEpochs, nBatchsize, dropout, lr, featuresList, aggregationMode):
+    inputsShape = {}
+    labels = torch.from_numpy(dataDic['labels'])
+    del dataDic['labels']
 
-    model = FCNN(inputs, emb, dropout, aggregationMode)
+    for key, value in dataDic.items():
+        inputsShape[key] = value.shape[1]
+
+    model = FCNN(inputsShape, dropout, aggregationMode)
     # should add weighted loss
     BCELoss = nn.BCEWithLogitsLoss()
-    MSELoss = nn.MSELoss()
 
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
-    indices = np.arange(dataDic['labels'].shape[0])
+    indices = np.arange(labels.shape[0])
 
     for epoch in range(nEpochs):
         np.random.shuffle(indices)
         for boundary in range(0, len(indices), nBatchsize):
             batchIndex = indices[boundary:boundary + nBatchsize]
-            encodedDic = {}
-            decodedDic = {}
-            featureLossesDic = {}
             batchLoss = 0
-            for feature in featuresList:
-                X = torch.tensor(dataDic[feature][batchIndex]).float()
-                encoded = model(X, feature, 'encoder')
-                decoded = model(encoded, feature, 'decoder')
-                encodedDic[feature] = encoded
-                decodedDic[feature] = decoded
-            
             # DNN Input
             DnnInput = torch.tensor([], dtype=float)
-            for index, key in enumerate(encodedDic):
+            for index, featureKey in enumerate(dataDic):
+                tensorred = torch.from_numpy(dataDic[featureKey][batchIndex]).float()
                 if index == 0:
-                    DnnInput = encodedDic[key]
+                    DnnInput = tensorred
                 else:
                     if aggregationMode == 'concatenate':
-                        DnnInput = torch.cat((DnnInput, encodedDic[key]), 1)
+                        DnnInput = torch.cat((DnnInput, tensorred), 1)
 
-            # AE Losses
-            for index, key in enumerate(decodedDic):
-                X = torch.tensor(dataDic[key][batchIndex]).float()
-                featureLossesDic[key] = MSELoss(decodedDic[key], X)
-                batchLoss += featureLossesDic[key]
-
-            Y = torch.tensor(dataDic['labels'][batchIndex]).float()
+            Y = torch.tensor(labels[batchIndex]).float()
             y_pred = model(DnnInput, None, 'DNN')
 
             dnnLoss = BCELoss(y_pred, Y) 
@@ -135,29 +77,20 @@ def trainFNN(dataDic, emb, nEpochs, nBatchsize, dropout, lr, featuresList, aggre
         if epoch % 2 == 0:
             print('------------------- epoch: ', epoch, ' -------------------' )
             print('-> batchLoss: ', batchLoss.item())
-            print('-> dnnLoss: ', dnnLoss.item())
-            # AE Losses
-            for index, key in enumerate(featureLossesDic):
-                print(key, ' loss: ', featureLossesDic[key].item())
-
 
     model.eval()
     return model
 
 def testFNN(model, dataDic, featuresList, aggregationMode):
-    encodedDic = {}
-    for feature in featuresList:
-        X = torch.tensor(dataDic[feature]).float()
-        encoded = model(X, feature, 'encoder')
-        encodedDic[feature] = encoded
-    
+    # DNN Input
     DnnInput = torch.tensor([], dtype=float)
-    for index, key in enumerate(encodedDic):
+    for index, featureKey in enumerate(dataDic):
+        tensorred = torch.from_numpy(dataDic[featureKey]).float()
         if index == 0:
-            DnnInput = encodedDic[key]
+            DnnInput = tensorred
         else:
             if aggregationMode == 'concatenate':
-                DnnInput = torch.cat((DnnInput, encodedDic[key]), 1)
+                DnnInput = torch.cat((DnnInput, tensorred), 1)    
         
     y_pred = model(DnnInput, None, 'DNN')
     sig = torch.nn.Sigmoid()

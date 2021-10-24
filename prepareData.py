@@ -26,9 +26,10 @@ def concatenation(drugSimilarity, diseaseSimilarity, indices):
         concatenatedData.append(np.hstack((drugSimilarity[pair[0]], diseaseSimilarity[pair[1]])))
     return concatenatedData
 
-def prepareData(featureList, embeddingMethod):
+def prepareDrugData(featureList, embeddingMethod):
     featureMatrixDic = {}
     finalDic = {}
+
     for feature in featureList:
         matrix = np.loadtxt('./data/'+ feature+ '_feature_matrix.txt')
         featureMatrixDic[feature] = matrix

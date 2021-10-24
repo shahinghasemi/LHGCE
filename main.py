@@ -1,5 +1,5 @@
 import torch
-from prepareData import prepareData
+from prepareData import prepareDrugData
 import numpy as np
 from FNN import trainFNN, testFNN
 from metrics import calculateMetric
@@ -12,7 +12,6 @@ torch.use_deterministic_algorithms(True)
 
 # Command line options
 parser = argparse.ArgumentParser(description='Options')
-parser.add_argument('--emb', help='auto-encoder embedding size',type=int, default=32)
 parser.add_argument('--emb-method', help='embedding method for drug features', type=str, default='matrix')
 parser.add_argument('--feature-list', help='the feature list to include', type=str, nargs="+")
 parser.add_argument('--folds', help='number of folds for cross-validation',type=int,  default=5)
@@ -26,7 +25,6 @@ args = parser.parse_args()
 print(args)
 
 # Setting the global variables
-EMBEDDING_DEM = args.emb
 FEATURE_LIST = args.feature_list
 EPOCHS = args.epoch
 BATCHSIZE = args.batchsize
@@ -37,57 +35,51 @@ LEARNING_RATE= args.lr
 AGGREGATE_METHOD = args.agg_method
 DRUG_NUMBER = 269
 DISEASE_NUMBER = 598
-ENZYME_NUMBER = 108
-STRUCTURE_NUMBER = 881
-PATHWAY_NUMBER = 258
-TARGET_NUMBER = 529
 INTERACTIONS_NUMBER = 18416
 NONINTERACTIONS_NUMBER = 142446
 
-def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInteractionIndices):
+def crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions):
     metrics = np.zeros(7)
-    # To be dividable by 5
-    totalInteractionIndex = np.arange(INTERACTIONS_NUMBER - 1)
-    totalNonInteractionIndex = np.arange(NONINTERACTIONS_NUMBER - 1)
 
-    np.random.shuffle(totalInteractionIndex)
-    np.random.shuffle(totalNonInteractionIndex)
+    sizeOfInteractions = totalInteractions.shape[0]
+    sizeOfNonInteractions = totalNonInteractions.shape[0]
 
-    totalInteractionIndex = totalInteractionIndex.reshape(FOLDS, INTERACTIONS_NUMBER // FOLDS)
-    totalNonInteractionIndex = totalNonInteractionIndex.reshape(FOLDS, NONINTERACTIONS_NUMBER // FOLDS)
+    totalInteractionIndices = np.arange(sizeOfInteractions)
+    totalNonInteractionIndices = np.arange(sizeOfNonInteractions)
+
+    np.random.shuffle(totalInteractionIndices)
+    np.random.shuffle(totalNonInteractionIndices)
+
+    interactionsIndicesFolds = totalInteractionIndices.reshape(FOLDS, sizeOfInteractions // FOLDS)
+    nonInteractionsIndicesFolds = totalNonInteractionIndices.reshape(FOLDS, sizeOfNonInteractions // FOLDS)
 
     for k in range(FOLDS):
-        testInteractionsIndex = totalInteractionIndex[k]
-        trainInteractionsIndex = np.setdiff1d(totalInteractionIndex.flatten(), testInteractionsIndex, assume_unique=True)
+        testInteractionsIndex = interactionsIndicesFolds[k]
+        trainInteractionsIndex = np.setdiff1d(interactionsIndicesFolds.flatten(), testInteractionsIndex, assume_unique=True)
+
+        testNonInteractionsIndex = nonInteractionsIndicesFolds[k]
 
         allDataDic = {}
         for featureIndex in range(len(FEATURE_LIST)):
             involvedDiseases = []
             XTrain = []
             YTrain = []
-            for drugIndex, diseaseIndex in interactionIndices[trainInteractionsIndex]:
+            for drugIndex, diseaseIndex in totalInteractions[trainInteractionsIndex]:
                 drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
                 XTrain.append(drug)
                 involvedDiseases.append(diseaseSim[diseaseIndex])
                 YTrain.append([1])
             
+            # we won't use non interactions in training phase
             interactions = len(YTrain)
-
-            for drugIndex, diseaseIndex in nonInteractionIndices:
-                drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
-                XTrain.append(drug)
-                involvedDiseases.append(diseaseSim[diseaseIndex])
-                YTrain.append([0])
-
-            nonInteractions = len(YTrain) - interactions
-            print('train: interactions: ', interactions, 'non-interactions: ', nonInteractions)
+            print('train: interactions: ', interactions)
 
             allDataDic[FEATURE_LIST[featureIndex]] = np.array(XTrain)
         
         YTrain = np.array(YTrain)
         allDataDic['diseases'] = np.array(involvedDiseases)
         allDataDic['labels'] = YTrain
-        trainedModel = trainFNN(allDataDic, EMBEDDING_DEM, EPOCHS, BATCHSIZE, DROPOUT, 
+        trainedModel = trainFNN(allDataDic, EPOCHS, BATCHSIZE, DROPOUT, 
             LEARNING_RATE, FEATURE_LIST, AGGREGATE_METHOD)
 
         # TESTING
@@ -95,7 +87,7 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
             XTest = []
             YTest = []
             involvedDiseases = []
-            for drugIndex, diseaseIndex in interactionIndices[testInteractionsIndex]:
+            for drugIndex, diseaseIndex in totalInteractions[testInteractionsIndex]:
                 drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
                 XTest.append(drug)
                 involvedDiseases.append(diseaseSim[diseaseIndex])
@@ -103,7 +95,7 @@ def crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInt
 
             interactions = len(YTest)
 
-            for drugIndex, diseaseIndex in nonInteractionIndices:
+            for drugIndex, diseaseIndex in totalNonInteractions[testNonInteractionsIndex]:
                 drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
                 XTest.append(drug)
                 involvedDiseases.append(diseaseSim[diseaseIndex])
@@ -129,19 +121,23 @@ def main():
     print('nDrugs: ', DRUG_NUMBER)
     print('nDisease: ', DISEASE_NUMBER)
     
-    drugDic = prepareData(FEATURE_LIST, EMBEDDING_METHOD)
-
+    drugDic = prepareDrugData(FEATURE_LIST, EMBEDDING_METHOD)
     drugDisease = np.loadtxt('./data/drug_dis.csv', delimiter=',')
     diseaseSim = np.loadtxt('./data/dis_sim.csv', delimiter=',')
 
-    interactionIndices = np.array(np.mat(np.where(drugDisease == 1)).T) #(18416, 2)
-    nonInteractionIndices = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
+    totalInteractions = np.array(np.mat(np.where(drugDisease == 1)).T) #(18416, 2)
+    totalNonInteractions = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
+    
+    # make it dividable by 5
+    totalInteractions = totalInteractions[0:18415,:]
 
-    # we want to have the same number of non interactions as interactions
-    # selection = np.random.choice(NONINTERACTIONS_NUMBER, INTERACTIONS_NUMBER)
-    # nonInteractionIndices = nonInteractionIndices[selection]
+    # we want to have 50% of the nonInteractions to select 10% of them in each fold 
+    # -3 is to make it dividable by 5
+    selectionSize = round(NONINTERACTIONS_NUMBER * 5/10) - 3
+    selection = np.random.choice(NONINTERACTIONS_NUMBER, selectionSize)
+    totalNonInteractions = totalNonInteractions[selection]
 
-    results = crossValidation(drugDic, diseaseSim, drugDisease, interactionIndices, nonInteractionIndices)
+    results = crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions)
     print('results: ', results / FOLDS)
 
 main()
