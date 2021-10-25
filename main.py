@@ -58,21 +58,23 @@ def crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions
         trainInteractionsIndex = np.setdiff1d(interactionsIndicesFolds.flatten(), testInteractionsIndex, assume_unique=True)
 
         testNonInteractionsIndex = nonInteractionsIndicesFolds[k]
+        trainNonInteractionsIndex = np.setdiff1d(nonInteractionsIndicesFolds.flatten(), testNonInteractionsIndex, assume_unique=True)
+
 
         allDataDic = {}
         for featureIndex in range(len(FEATURE_LIST)):
             involvedDiseases = []
             XTrain = []
             YTrain = []
-            for drugIndex, diseaseIndex in totalInteractions[trainInteractionsIndex]:
+            for drugIndex, diseaseIndex in totalNonInteractions[trainNonInteractionsIndex]:
                 drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
                 XTrain.append(drug)
                 involvedDiseases.append(diseaseSim[diseaseIndex])
-                YTrain.append([1])
+                YTrain.append([0])
             
             # we won't use non interactions in training phase
-            interactions = len(YTrain)
-            print('train: interactions: ', interactions)
+            noninteractions = len(YTrain)
+            print('train: noninteractions: ', noninteractions)
 
             allDataDic[FEATURE_LIST[featureIndex]] = np.array(XTrain)
         
@@ -87,7 +89,7 @@ def crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions
             XTest = []
             YTest = []
             involvedDiseases = []
-            for drugIndex, diseaseIndex in totalInteractions[testInteractionsIndex]:
+            for drugIndex, diseaseIndex in totalInteractions:
                 drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
                 XTest.append(drug)
                 involvedDiseases.append(diseaseSim[diseaseIndex])
@@ -95,7 +97,7 @@ def crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions
 
             interactions = len(YTest)
 
-            for drugIndex, diseaseIndex in totalNonInteractions:
+            for drugIndex, diseaseIndex in totalNonInteractions[testNonInteractionsIndex]:
                 drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
                 XTest.append(drug)
                 involvedDiseases.append(diseaseSim[diseaseIndex])

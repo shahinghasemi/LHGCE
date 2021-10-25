@@ -107,4 +107,4 @@ def testFNN(model, dataDic, featuresList, aggregationMode):
 
     loss = torch.sum(loss, 1, True)
     loss =  loss / torch.sum(loss, 0)
-    return 1 - loss
+    return loss
