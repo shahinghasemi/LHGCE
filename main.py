@@ -95,7 +95,7 @@ def crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions
 
             interactions = len(YTest)
 
-            for drugIndex, diseaseIndex in totalNonInteractions[testNonInteractionsIndex]:
+            for drugIndex, diseaseIndex in totalNonInteractions:
                 drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
                 XTest.append(drug)
                 involvedDiseases.append(diseaseSim[diseaseIndex])
@@ -130,12 +130,12 @@ def main():
     
     # make it dividable by 5
     totalInteractions = totalInteractions[0:18415,:]
-
+    totalNonInteractions = totalNonInteractions[0: 142445, :]
     # we want to have 50% of the nonInteractions to select 10% of them in each fold 
     # -3 is to make it dividable by 5
-    selectionSize = round(NONINTERACTIONS_NUMBER * 5/10) - 3
-    selection = np.random.choice(NONINTERACTIONS_NUMBER, selectionSize)
-    totalNonInteractions = totalNonInteractions[selection]
+    # selectionSize = round(NONINTERACTIONS_NUMBER * 5/10) - 3
+    # selection = np.random.choice(NONINTERACTIONS_NUMBER, selectionSize)
+    # totalNonInteractions = totalNonInteractions[selection]
 
     results = crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions)
     print('results: ', results / FOLDS)

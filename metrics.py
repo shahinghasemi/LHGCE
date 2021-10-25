@@ -5,8 +5,6 @@ import numpy as np
 def calculateMetric(real_score, predict_score):
     real_score = real_score.reshape((real_score.shape[0],))
     predict_score = predict_score.reshape((predict_score.shape[0],))
-    print('after real_score: ', real_score)
-    print('after predict_score: ', predict_score)
     _fpr, _tpr, thresholds = roc_curve(real_score, predict_score)
     thresholds = np.mat(thresholds)
     thresholds_num = thresholds.shape[1]
