@@ -94,7 +94,6 @@ def testFNN(model, dataDic, featuresList, aggregationMode):
     # DNN Input
     MSELoss = nn.MSELoss(reduction='none')
     X = torch.tensor([], dtype=float)
-    print('here')
     for index, featureKey in enumerate(dataDic):
         tensorred = torch.from_numpy(dataDic[featureKey]).float()
         if index == 0:
@@ -103,12 +102,10 @@ def testFNN(model, dataDic, featuresList, aggregationMode):
             if aggregationMode == 'concatenate':
                 X = torch.cat((X, tensorred), 1)    
     reconstructed = model(X)
-    print('here2')
 
     with torch.no_grad():
         loss = MSELoss(reconstructed, X)
 
-    print('here3')
     loss = torch.sum(loss, 1, True)
     loss =  loss / torch.sum(loss, 0)
     return loss

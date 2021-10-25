@@ -113,9 +113,7 @@ def crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions
         allDataDic['diseases'] = np.array(involvedDiseases)
     
         y_pred_prob = testFNN(trainedModel, allDataDic, FEATURE_LIST, AGGREGATE_METHOD).detach().numpy()
-        print('before metric')
         metric = np.array(calculateMetric(YTest, y_pred_prob))
-        print('after metric')
         metrics += metric
         print('metric: ', metric)
 
