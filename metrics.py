@@ -1,5 +1,5 @@
 
-from sklearn.metrics import accuracy_score, f1_score, roc_curve, auc
+from sklearn.metrics import accuracy_score, f1_score, roc_curve, auc, recall_score, confusion_matrix, precision_score
 import numpy as np
 
 def calculateMetric(real_score, predict_score):
@@ -65,3 +65,13 @@ def calculateMetric(real_score, predict_score):
     recall = recall_list[max_index]
     precision = precision_list[max_index]
     return [aupr[0, 0], auc[0, 0], f1_score, accuracy, recall, specificity, precision]
+
+def labelBasedMetrics(label, pred_label):
+    tn, fp, fn, tp = confusion_matrix(label, pred_label).ravel()
+    print('tn: ', tn, 'fp: ', fp, 'fn: ', fn, 'tp: ', tp)
+    f1 = f1_score(label, pred_label)
+    acc = accuracy_score(label, pred_label)
+    recall = recall_score(label, pred_label)
+    precision = precision_score(label, pred_label)
+    specificity = tn / (tn + fp)
+    return f1, acc, recall, specificity, precision, 0, 0

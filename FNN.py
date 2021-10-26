@@ -3,40 +3,32 @@ from torch import nn, optim
 import numpy as np
 from torch.nn.modules.container import Sequential
 class FCNN(nn.Module):
-    def __init__(self, inputsShape, dropout, aggregationMode):
+    def __init__(self, inputShape, dropout):
         super(FCNN, self).__init__()
-        self.inputs = inputsShape
-        self.inputDim = 0
-        self.aggregationMode = aggregationMode
-
-        for featureKey, shape in self.inputs.items():
-            if self.aggregationMode == 'concatenate':
-                self.inputDim += shape
-
-            self.encoder = nn.Sequential(
-                nn.Linear(self.inputDim, 128),
-                nn.BatchNorm1d(128),
-                nn.ReLU(),
-                nn.Dropout(dropout),
-                nn.Linear(128, 64),
-                nn.BatchNorm1d(64),
-                nn.ReLU(),
-                nn.Dropout(dropout),
-                nn.Linear(64, 32),
-                nn.ReLU(),
-            )
-            self.decoder = nn.Sequential(
-                nn.Linear(32, 64),
-                nn.BatchNorm1d(64),
-                nn.ReLU(),
-                nn.Dropout(dropout),
-                nn.Linear(64, 128),
-                nn.BatchNorm1d(128),
-                nn.ReLU(),
-                nn.Dropout(dropout),
-                nn.Linear(128, self.inputDim),
-                nn.ReLU(),
-            )
+        self.encoder = nn.Sequential(
+            nn.Linear(inputShape, 128),
+            nn.BatchNorm1d(128),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(128, 64),
+            nn.BatchNorm1d(64),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(64, 32),
+            nn.ReLU(),
+        )
+        self.decoder = nn.Sequential(
+            nn.Linear(32, 64),
+            nn.BatchNorm1d(64),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(64, 128),
+            nn.BatchNorm1d(128),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(128, inputShape),
+            nn.ReLU(),
+        )
         
     def forward(self, x):
         encoded = self.encoder(x)
@@ -44,15 +36,10 @@ class FCNN(nn.Module):
         return reconstructed
 
 
-def trainFNN(dataDic, nEpochs, nBatchsize, dropout, lr, featuresList, aggregationMode):
-    inputsShape = {}
-    labels = torch.from_numpy(dataDic['labels'])
-    del dataDic['labels']
-
-    for key, value in dataDic.items():
-        inputsShape[key] = value.shape[1]
-
-    model = FCNN(inputsShape, dropout, aggregationMode)
+def trainFNN(dataDic, nEpochs, nBatchsize, dropout, lr):
+    labels = torch.from_numpy(dataDic['y'])
+    X = dataDic['X']
+    model = FCNN(X.shape[1], dropout)
     # should add weighted loss
     # BCELoss = nn.BCEWithLogitsLoss()
     MSELoss = nn.MSELoss()
@@ -65,42 +52,25 @@ def trainFNN(dataDic, nEpochs, nBatchsize, dropout, lr, featuresList, aggregatio
         for boundary in range(0, len(indices), nBatchsize):
             batchIndex = indices[boundary:boundary + nBatchsize]
             batchLoss = 0
-            # DNN Input
-            X = torch.tensor([], dtype=float)
-            for index, featureKey in enumerate(dataDic):
-                tensorred = torch.from_numpy(dataDic[featureKey][batchIndex]).float()
-                if index == 0:
-                    X = tensorred
-                else:
-                    if aggregationMode == 'concatenate':
-                        X = torch.cat((X, tensorred), 1)
-
-            reconstructed = model(X)
-
-            dnnLoss = MSELoss(reconstructed, X)
+            XTrain = X[batchIndex].float()
+            reconstructed = model(XTrain)
+            dnnLoss = MSELoss(reconstructed, XTrain)
             batchLoss += dnnLoss
             optimizer.zero_grad()
             batchLoss.backward()
             optimizer.step()
 
         if epoch % 2 == 0:
-            print('------------------- epoch: ', epoch, ' -------------------' )
+            print('------------------- epoch: ', epoch, ' -------------------')
             print('-> batchLoss: ', batchLoss.item())
 
-    model.eval()
     return model
 
-def testFNN(model, dataDic, featuresList, aggregationMode):
+def testFNN(model, dataDic, aggregationMode):
     # DNN Input
+    model.eval()
     MSELoss = nn.MSELoss(reduction='none')
-    X = torch.tensor([], dtype=float)
-    for index, featureKey in enumerate(dataDic):
-        tensorred = torch.from_numpy(dataDic[featureKey]).float()
-        if index == 0:
-            X = tensorred
-        else:
-            if aggregationMode == 'concatenate':
-                X = torch.cat((X, tensorred), 1)    
+    X = dataDic['X'].float()
     reconstructed = model(X)
 
     with torch.no_grad():
