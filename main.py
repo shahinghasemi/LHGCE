@@ -133,7 +133,7 @@ def crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions
         allDataDic = {} 
         allDataDic['X'] = XTest
         if CLASSIFIER == 'MAFCN':
-            y_pred_prob = testFNN(trainedModel, allDataDic, AGGREGATE_METHOD).detach().numpy()
+            y_pred_prob = testFNN(trainedModel, allDataDic).detach().numpy()
             metric = np.array(calculateMetric(YTest, y_pred_prob))
         if CLASSIFIER == 'OCC':
             pred_label = model.predict(allDataDic['X'])
@@ -145,18 +145,18 @@ def crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions
 
     return metrics
 
-def makeX(dataDic, mode='concatenate'):
+def makeX(dataDic, aggregation='concatenate'):
     X = torch.tensor([], dtype=float)
     for index, featureKey in enumerate(dataDic):
         tensorred = torch.from_numpy(dataDic[featureKey])
-        if mode == 'concatenate':
+        if aggregation == 'concatenate':
             if index == 0:
                 X = tensorred
             else:
                 X = torch.cat((X, tensorred), 1)
 
         # make sure the dimensions are the same
-        if mode == 'sum':
+        if aggregation == 'sum':
             if index == 0:
                 X = tensorred
             else:

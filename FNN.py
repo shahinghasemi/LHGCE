@@ -66,7 +66,7 @@ def trainFNN(dataDic, nEpochs, nBatchsize, dropout, lr):
 
     return model
 
-def testFNN(model, dataDic, aggregationMode):
+def testFNN(model, dataDic):
     # DNN Input
     model.eval()
     MSELoss = nn.MSELoss(reduction='none')
