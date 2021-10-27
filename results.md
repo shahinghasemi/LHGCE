@@ -12,3 +12,4 @@
 | SVM OCC using 80% of positives | e, p, t, s | 5 | - | jaccard | concatenate |  - | - | - | - | 6.1% | - | 5% | - | 98.8% | 3.7% | 2.5% 
 | SVM OCC using 80% of positives | t | 5 | - | jaccard | concatenate |  - | - | - | - | 10.1% | - | 5.2% | - | 98.1% | 7.8% | 2.6% 
 
+[0.05204746 0.0985588  0.98186261 0.07572045 0.02673226 0. 0.        ]

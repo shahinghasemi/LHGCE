@@ -27,6 +27,7 @@ def concatenation(drugSimilarity, diseaseSimilarity, indices):
     return concatenatedData
 
 def prepareDrugData(featureList, embeddingMethod):
+    print('embeddingMethod: ', embeddingMethod)
     featureMatrixDic = {}
     finalDic = {}
 
@@ -34,7 +35,7 @@ def prepareDrugData(featureList, embeddingMethod):
         matrix = np.loadtxt('./data/'+ feature+ '_feature_matrix.txt')
         featureMatrixDic[feature] = matrix
     
-    if embeddingMethod == 'AE' or 'matrix':
+    if embeddingMethod == 'AE' or embeddingMethod == 'matrix':
         finalDic = featureMatrixDic;
 
     elif embeddingMethod == 'jaccard':
@@ -46,7 +47,8 @@ def prepareDrugData(featureList, embeddingMethod):
             pca = PCA(n_components=32)
             transformed = pca.fit_transform(matrix)
             finalDic[feature] = transformed
-
+    else:
+        exit('please provide a known embedding method')
     # elif similarity == 'cosine':
     
     return finalDic

@@ -14,15 +14,15 @@ torch.use_deterministic_algorithms(True)
 
 # Command line options
 parser = argparse.ArgumentParser(description='Options')
-parser.add_argument('--emb-method', help='embedding method for drug features', type=str, default='matrix')
+parser.add_argument('--emb', help='embedding method for drug features', type=str, default='matrix')
 parser.add_argument('--feature-list', help='the feature list to include', type=str, nargs="+")
 parser.add_argument('--folds', help='number of folds for cross-validation',type=int,  default=5)
 parser.add_argument('--batchsize', help='batch-size for DNN',type=int, default=1000)
 parser.add_argument('--epoch', help='number of epochs to train in model',type=int, default=20)
 parser.add_argument('--dropout', help='dropout probability for DNN',type=float, default=0.3)
 parser.add_argument('--lr', help='learning rate for DNN',type=float, default=0.001)
-parser.add_argument('--agg-method', help='aggregation method for DNN input', type=str, default='concatenate')
-parser.add_argument('--classifier', help='classifier to use for prediction', type=str, default='MAFCN')
+parser.add_argument('--agg', help='aggregation method for DNN input', type=str, default='concatenate')
+parser.add_argument('--clf', help='classifier to use for prediction', type=str, default='MAFCN')
 
 args = parser.parse_args()
 print(args)
@@ -31,12 +31,12 @@ print(args)
 FEATURE_LIST = args.feature_list
 EPOCHS = args.epoch
 BATCHSIZE = args.batchsize
-EMBEDDING_METHOD = args.emb_method
+EMBEDDING = args.emb
 FOLDS = args.folds
 DROPOUT = args.dropout
 LEARNING_RATE= args.lr
-CLASSIFIER = args.classifier
-AGGREGATE_METHOD = args.agg_method
+CLASSIFIER = args.clf
+AGGREGATION = args.agg
 DRUG_NUMBER = 269
 DISEASE_NUMBER = 598
 ENZYME_NUMBER = 108
@@ -88,7 +88,7 @@ def crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions
         YTrain = np.array(YTrain)
         allDataDic['diseases'] = np.array(involvedDiseases)
 
-        XTrain = makeX(allDataDic, AGGREGATE_METHOD)
+        XTrain = makeX(allDataDic, AGGREGATION)
 
         allDataDic = {} 
         allDataDic['y'] = YTrain
@@ -128,7 +128,7 @@ def crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions
         YTest = np.array(YTest)
         allDataDic['diseases'] = np.array(involvedDiseases)
 
-        XTest = makeX(allDataDic, AGGREGATE_METHOD)
+        XTest = makeX(allDataDic, AGGREGATION)
 
         allDataDic = {} 
         allDataDic['X'] = XTest
@@ -146,6 +146,9 @@ def crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions
     return metrics
 
 def makeX(dataDic, aggregation='concatenate'):
+    diseases = torch.from_numpy(dataDic['diseases'])
+    del dataDic['diseases']
+
     X = torch.tensor([], dtype=float)
     for index, featureKey in enumerate(dataDic):
         tensorred = torch.from_numpy(dataDic[featureKey])
@@ -154,14 +157,24 @@ def makeX(dataDic, aggregation='concatenate'):
                 X = tensorred
             else:
                 X = torch.cat((X, tensorred), 1)
-
         # make sure the dimensions are the same
         if aggregation == 'sum':
             if index == 0:
                 X = tensorred
             else:
                 X = X + tensorred
+        if aggregation == 'mul':
+            if index == 0:
+                X = tensorred
+            else:
+                X = X * tensorred
+        if aggregation == 'avg':
+            if index == 0:
+                X = tensorred
+            else:
+                X = (X + tensorred)/2
     # don't convert X to numpy array since this is the input to our model
+    X = torch.cat((X, diseases), 1)
     return X
 
 def splitter(interactionsPercent, nonInteractionsPercent, totalInteractions, totalNonInteractions, folds=5):
@@ -185,7 +198,7 @@ def main():
     print('nDrugs: ', DRUG_NUMBER)
     print('nDisease: ', DISEASE_NUMBER)
     
-    drugDic = prepareDrugData(FEATURE_LIST, EMBEDDING_METHOD)
+    drugDic = prepareDrugData(FEATURE_LIST, EMBEDDING)
     drugDisease = np.loadtxt('./data/drug_dis.csv', delimiter=',')
     diseaseSim = np.loadtxt('./data/dis_sim.csv', delimiter=',')
 
