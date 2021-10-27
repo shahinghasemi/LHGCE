@@ -27,7 +27,6 @@ def concatenation(drugSimilarity, diseaseSimilarity, indices):
     return concatenatedData
 
 def prepareDrugData(featureList, embeddingMethod):
-    print('embeddingMethod: ', embeddingMethod)
     featureMatrixDic = {}
     finalDic = {}
 

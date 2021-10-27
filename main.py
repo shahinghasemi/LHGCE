@@ -173,6 +173,8 @@ def makeX(dataDic, aggregation='concatenate'):
                 X = tensorred
             else:
                 X = (X + tensorred)/2
+        else:
+            exit('please use a known aggregation method')
     # don't convert X to numpy array since this is the input to our model
     X = torch.cat((X, diseases), 1)
     return X

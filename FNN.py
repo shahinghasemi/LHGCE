@@ -78,4 +78,4 @@ def testFNN(model, dataDic):
 
     loss = torch.sum(loss, 1, True)
     loss =  loss / torch.sum(loss, 0)
-    return loss
+    return 1 - loss
