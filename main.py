@@ -158,17 +158,17 @@ def makeX(dataDic, aggregation='concatenate'):
             else:
                 X = torch.cat((X, tensorred), 1)
         # make sure the dimensions are the same
-        if aggregation == 'sum':
+        elif aggregation == 'sum':
             if index == 0:
                 X = tensorred
             else:
                 X = X + tensorred
-        if aggregation == 'mul':
+        elif aggregation == 'mul':
             if index == 0:
                 X = tensorred
             else:
                 X = X * tensorred
-        if aggregation == 'avg':
+        elif aggregation == 'avg':
             if index == 0:
                 X = tensorred
             else:
