@@ -18,14 +18,6 @@ def readFromMat():
     np.savetxt('./pathway_feature_matrix.txt', np.array(data['pathway_feature_matrix']))
 
 
-def concatenation(drugSimilarity, diseaseSimilarity, indices):
-    concatenatedData = []
-    # loop through all the interactions indices(first is for drugs and second for disease)
-    for pair in indices:
-        # choose involved drug and disease vectors and concatenate them
-        concatenatedData.append(np.hstack((drugSimilarity[pair[0]], diseaseSimilarity[pair[1]])))
-    return concatenatedData
-
 def prepareDrugData(featureList, embeddingMethod):
     featureMatrixDic = {}
     finalDic = {}
