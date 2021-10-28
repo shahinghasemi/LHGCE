@@ -19,6 +19,7 @@ parser.add_argument('--feature-list', help='the feature list to include', type=s
 parser.add_argument('--folds', help='number of folds for cross-validation',type=int,  default=5)
 parser.add_argument('--batchsize', help='batch-size for DNN',type=int, default=1000)
 parser.add_argument('--epoch', help='number of epochs to train in model',type=int, default=20)
+parser.add_argument('--thresholds', help='number of epochs to train in model',type=int, default=30)
 parser.add_argument('--dropout', help='dropout probability for DNN',type=float, default=0.3)
 parser.add_argument('--lr', help='learning rate for DNN',type=float, default=0.001)
 parser.add_argument('--agg', help='aggregation method for DNN input', type=str, default='concatenate')
@@ -34,6 +35,7 @@ BATCHSIZE = args.batchsize
 EMBEDDING = args.emb
 FOLDS = args.folds
 DROPOUT = args.dropout
+THRESHOLD_PERCENT = args.thresholds
 LEARNING_RATE= args.lr
 CLASSIFIER = args.clf
 AGGREGATION = args.agg
@@ -140,7 +142,7 @@ def crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions
         allDataDic['X'] = XTest
         if CLASSIFIER == 'MAFCN':
             y_pred_prob = testFNN(trainedModel, allDataDic).detach().numpy()
-            metric = np.array(calculateMetric(YTest, y_pred_prob))
+            metric = np.array(calculateMetric(YTest, y_pred_prob, THRESHOLD_PERCENT))
         if CLASSIFIER == 'OCC':
             pred_label = model.predict(allDataDic['X'])
             pred_label[pred_label == -1] = 0

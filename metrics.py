@@ -2,11 +2,11 @@
 from sklearn.metrics import accuracy_score, f1_score, roc_curve, auc, recall_score, confusion_matrix, precision_score
 import numpy as np
 
-def calculateMetric(real_score, predict_score):
+def calculateMetric(real_score, predict_score, thresholdPercent):
     real_score = real_score.reshape((real_score.shape[0],))
     predict_score = predict_score.reshape((predict_score.shape[0],))
 
-    thresholds = thresholdCalculation(predict_score, 100)
+    thresholds = thresholdCalculation(predict_score, thresholdPercent)
     thresholds = np.mat(thresholds)
     thresholds_num = thresholds.shape[1]
     # ----------------------------- #
@@ -75,11 +75,11 @@ def thresholdCalculation(predict_score, percent):
     # thresholds_num = thresholds.shape[1]
     sorted_predict_score = np.array(sorted(list(set(np.array(predict_score).flatten()))))
     sorted_predict_score_num = len(sorted_predict_score)
-    print('number of unique prediction scores: ',sorted_predict_score_num)
+    print('number of unique prediction: ',sorted_predict_score_num, sorted_predict_score)
     numberOfThresholds = round(sorted_predict_score_num * percent/100)
     if numberOfThresholds == 0:
         return sorted_predict_score[0]
     steps = sorted_predict_score_num // numberOfThresholds
-    indexes = steps * np.arange(sorted_predict_score_num)
+    indexes = steps * np.arange(numberOfThresholds)
     thresholds = sorted_predict_score[indexes]
     return thresholds
