@@ -62,7 +62,8 @@ def trainFNN(dataDic, nEpochs, nBatchsize, dropout, lr):
     model = FCNN(X.shape[1], dropout)
     # should add weighted loss
     BCELoss = nn.BCEWithLogitsLoss()
-    optimizer = optim.Adam(model.parameters(), lr=lr)
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9)
+    scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.01, max_lr=0.1)
 
     indices = np.arange(labels.shape[0])
 
@@ -76,9 +77,9 @@ def trainFNN(dataDic, nEpochs, nBatchsize, dropout, lr):
             y = labels[batchIndex].float()
             dnnLoss = BCELoss(y_pred, y)
             batchLoss += dnnLoss
-            optimizer.zero_grad()
             batchLoss.backward()
             optimizer.step()
+        scheduler.step()
 
         if epoch % 2 == 0:
             print('------------------- epoch: ', epoch, ' -------------------')
