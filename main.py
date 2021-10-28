@@ -79,7 +79,7 @@ def crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions
                 involvedDiseases.append(diseaseSim[diseaseIndex])
                 YTrain.append([1])
 
-            for drugIndex, diseaseIndex in totalNonInteractions[trainNonInteractionsIndex]:
+            for drugIndex, diseaseIndex in totalNonInteractions:
                 drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
                 XTrain.append(drug)
                 involvedDiseases.append(diseaseSim[diseaseIndex])
@@ -120,7 +120,7 @@ def crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions
 
             interactions = len(YTest)
 
-            for drugIndex, diseaseIndex in totalNonInteractions[testNonInteractionsIndex]:
+            for drugIndex, diseaseIndex in totalNonInteractions:
                 drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
                 XTest.append(drug)
                 involvedDiseases.append(diseaseSim[diseaseIndex])
