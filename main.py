@@ -1,5 +1,5 @@
 import torch
-from prepareData import prepareDrugData
+from prepareData import prepareDrugData, plot
 import numpy as np
 from FNN import trainFNN, testFNN
 from metrics import calculateMetric, labelBasedMetrics
@@ -19,7 +19,7 @@ parser.add_argument('--feature-list', help='the feature list to include', type=s
 parser.add_argument('--folds', help='number of folds for cross-validation',type=int,  default=5)
 parser.add_argument('--batchsize', help='batch-size for DNN',type=int, default=1000)
 parser.add_argument('--epoch', help='number of epochs to train in model',type=int, default=20)
-parser.add_argument('--thresholds', help='number of epochs to train in model',type=int, default=30)
+parser.add_argument('--thr-percent', help='the threshold percentage with respect to batch size',type=int, default=30)
 parser.add_argument('--dropout', help='dropout probability for DNN',type=float, default=0.3)
 parser.add_argument('--lr', help='learning rate for DNN',type=float, default=0.001)
 parser.add_argument('--agg', help='aggregation method for DNN input', type=str, default='concatenate')
@@ -35,7 +35,7 @@ BATCHSIZE = args.batchsize
 EMBEDDING = args.emb
 FOLDS = args.folds
 DROPOUT = args.dropout
-THRESHOLD_PERCENT = args.thresholds
+THRESHOLD_PERCENT = args.thr_percent
 LEARNING_RATE= args.lr
 CLASSIFIER = args.clf
 AGGREGATION = args.agg
@@ -77,7 +77,7 @@ def crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions
                 XTrain.append(drug)
                 involvedDiseases.append(diseaseSim[diseaseIndex])
                 YTrain.append([1])
-
+            plot(np.array(XTrain)[:, 0:1], np.array(XTrain)[:, 1:], 'positives')
             for drugIndex, diseaseIndex in totalNonInteractions:
                 drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
                 XTrain.append(drug)
@@ -204,7 +204,7 @@ def splitter(interactionsPercent, nonInteractionsPercent, totalInteractions, tot
 def main():
     print('nDrugs: ', DRUG_NUMBER)
     print('nDisease: ', DISEASE_NUMBER)
-    
+
     drugDic = prepareDrugData(FEATURE_LIST, EMBEDDING)
     drugDisease = np.loadtxt('./data/drug_dis.csv', delimiter=',')
     diseaseSim = np.loadtxt('./data/dis_sim.csv', delimiter=',')
@@ -212,7 +212,7 @@ def main():
     totalInteractions = np.array(np.mat(np.where(drugDisease == 1)).T) #(18416, 2)
     totalNonInteractions = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
     
-    selectedInteractions, selectedNonInteractions = splitter(100, 100, totalInteractions, totalNonInteractions)
+    selectedInteractions, selectedNonInteractions = splitter(5, 5, totalInteractions, totalNonInteractions)
 
     results = crossValidation(drugDic, diseaseSim, selectedInteractions, selectedNonInteractions)
     print('results: ', results / FOLDS)

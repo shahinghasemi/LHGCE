@@ -1,6 +1,8 @@
+import matplotlib
 import numpy as np
 import scipy.io as sio
 from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
 
 # def Cosine(matrix)
 def Jaccard(matrix):
@@ -17,6 +19,9 @@ def readFromMat():
     np.savetxt('./enzyme_feature_matrix.txt', np.array(data['enzyme_feature_matrix']))
     np.savetxt('./pathway_feature_matrix.txt', np.array(data['pathway_feature_matrix']))
 
+def plot(X, Y, label):
+    print('about to draw: X.shape: ', X.shape, 'Y.shape: ', Y.shape)
+    plt.scatter(X, Y, c='b', marker='o', linewidth=0, s=15, alpha=0.8, label=label)
 
 def prepareDrugData(featureList, embeddingMethod):
     featureMatrixDic = {}
@@ -35,7 +40,7 @@ def prepareDrugData(featureList, embeddingMethod):
             
     elif embeddingMethod == 'PCA':
         for feature, matrix in featureMatrixDic.items():
-            pca = PCA(n_components=32)
+            pca = PCA(n_components=2)
             transformed = pca.fit_transform(matrix)
             finalDic[feature] = transformed
     else:
@@ -43,3 +48,5 @@ def prepareDrugData(featureList, embeddingMethod):
     # elif similarity == 'cosine':
     
     return finalDic
+
+
