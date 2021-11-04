@@ -4,6 +4,7 @@ import scipy.io as sio
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 
+
 # def Cosine(matrix)
 def Jaccard(matrix):
     matrix = np.mat(matrix)
@@ -22,6 +23,7 @@ def readFromMat():
 def plot(X, Y, label):
     print('about to draw: X.shape: ', X.shape, 'Y.shape: ', Y.shape)
     plt.scatter(X, Y, c='b', marker='o', linewidth=0, s=15, alpha=0.8, label=label)
+    plt.show()
 
 def prepareDrugData(featureList, embeddingMethod):
     featureMatrixDic = {}

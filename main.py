@@ -212,7 +212,7 @@ def main():
     totalInteractions = np.array(np.mat(np.where(drugDisease == 1)).T) #(18416, 2)
     totalNonInteractions = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
     
-    selectedInteractions, selectedNonInteractions = splitter(5, 5, totalInteractions, totalNonInteractions)
+    selectedInteractions, selectedNonInteractions = splitter(100, 100, totalInteractions, totalNonInteractions)
 
     results = crossValidation(drugDic, diseaseSim, selectedInteractions, selectedNonInteractions)
     print('results: ', results / FOLDS)
