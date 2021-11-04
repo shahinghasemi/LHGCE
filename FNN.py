@@ -64,11 +64,8 @@ def trainFNN(dataDic, nEpochs, nBatchsize, dropout, lr):
     BCELoss = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr = lr)
     # scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.01, max_lr=0.1)
-
-    indices = np.arange(labels.shape[0])
-
     for epoch in range(nEpochs):
-        np.random.shuffle(indices)
+        indices = np.random.permutation(labels.shape[0])
         for boundary in range(0, len(indices), nBatchsize):
             batchIndex = indices[boundary:boundary + nBatchsize]
             batchLoss = 0

@@ -54,11 +54,8 @@ def crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions
     sizeOfInteractions = totalInteractions.shape[0]
     sizeOfNonInteractions = totalNonInteractions.shape[0]
 
-    totalInteractionIndices = np.arange(sizeOfInteractions)
-    totalNonInteractionIndices = np.arange(sizeOfNonInteractions)
-
-    np.random.shuffle(totalInteractionIndices)
-    np.random.shuffle(totalNonInteractionIndices)
+    totalInteractionIndices = np.random.permutation(sizeOfInteractions)
+    totalNonInteractionIndices = np.random.permutation(sizeOfNonInteractions)
 
     interactionsIndicesFolds = totalInteractionIndices.reshape(FOLDS, sizeOfInteractions // FOLDS)
     nonInteractionsIndicesFolds = totalNonInteractionIndices.reshape(FOLDS, sizeOfNonInteractions // FOLDS)
