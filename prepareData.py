@@ -20,9 +20,14 @@ def readFromMat():
     np.savetxt('./enzyme_feature_matrix.txt', np.array(data['enzyme_feature_matrix']))
     np.savetxt('./pathway_feature_matrix.txt', np.array(data['pathway_feature_matrix']))
 
-def plot(X, Y, label):
-    print('about to draw: X.shape: ', X.shape, 'Y.shape: ', Y.shape)
-    plt.scatter(X, Y, c='b', marker='o', linewidth=0, s=15, alpha=0.8, label=label)
+def plotAndSave(X, Y, labels, feature):
+    print('about to draw: X[0].shape: ', X[0].shape,  'X[1].shape: ', X[1].shape)
+    print('about to draw: Y[0].shape: ', Y[0].shape,  'Y[1].shape: ', Y[1].shape)
+
+    plt.scatter(X[0], Y[0], c='blue', marker='.', linewidth=0, s=10, alpha=0.8, label=labels[0])
+    plt.scatter(X[1], Y[1], c='red', marker='o', linewidth=0, s=10, alpha=0.8, label=labels[1])
+    plt.grid()
+    plt.legend()
     plt.show()
 
 def prepareDrugData(featureList, embeddingMethod):
@@ -42,7 +47,7 @@ def prepareDrugData(featureList, embeddingMethod):
             
     elif embeddingMethod == 'PCA':
         for feature, matrix in featureMatrixDic.items():
-            pca = PCA(n_components=2)
+            pca = PCA(n_components=2,)
             transformed = pca.fit_transform(matrix)
             finalDic[feature] = transformed
     else:

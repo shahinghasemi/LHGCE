@@ -1,5 +1,5 @@
 import torch
-from prepareData import prepareDrugData, plot
+from prepareData import prepareDrugData, plotAndSave
 import numpy as np
 from FNN import trainFNN, testFNN
 from metrics import calculateMetric, labelBasedMetrics
@@ -77,13 +77,12 @@ def crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions
                 XTrain.append(drug)
                 involvedDiseases.append(diseaseSim[diseaseIndex])
                 YTrain.append([1])
-            plot(np.array(XTrain)[:, 0:1], np.array(XTrain)[:, 1:], 'positives')
+                
             for drugIndex, diseaseIndex in totalNonInteractions:
                 drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
                 XTrain.append(drug)
                 involvedDiseases.append(diseaseSim[diseaseIndex])
                 YTrain.append([0])
-            
             # we won't use non interactions in training phase
             interactions = len(YTrain)
             print('train: interactions: ', interactions)
@@ -201,10 +200,39 @@ def splitter(interactionsPercent, nonInteractionsPercent, totalInteractions, tot
 
     return selectedInteractions, selectedNonInteractions
 
+def makePlotData(drugDic, totalInteractions, totalNonInteractions):
+    for featureIndex in range(len(FEATURE_LIST)):
+        positives = []
+        negatives = []
+        labels = []
+        X = []
+        Y = []
+        for drugIndex, diseaseIndex in totalInteractions:
+            drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
+            positives.append(drug)
+        labels.append('positives')
+        positives = np.array(positives)
+        X.append(positives[:, 0])
+        Y.append(positives[:, 1])
+
+        for drugIndex, diseaseIndex in totalNonInteractions:
+            drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
+            negatives.append(drug)
+        labels.append('negatives')
+        negatives = np.array(negatives)
+        X.append(negatives[:, 0])
+        Y.append(negatives[:, 1])
+
+        X = np.array(X)
+        Y = np.array(Y)
+
+        plotAndSave(X, Y, labels, FEATURE_LIST[featureIndex])
+    
+    return X, Y, labels
+
 def main():
     print('nDrugs: ', DRUG_NUMBER)
     print('nDisease: ', DISEASE_NUMBER)
-
     drugDic = prepareDrugData(FEATURE_LIST, EMBEDDING)
     drugDisease = np.loadtxt('./data/drug_dis.csv', delimiter=',')
     diseaseSim = np.loadtxt('./data/dis_sim.csv', delimiter=',')
@@ -212,6 +240,7 @@ def main():
     totalInteractions = np.array(np.mat(np.where(drugDisease == 1)).T) #(18416, 2)
     totalNonInteractions = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
     
+    makePlotData(drugDic, totalInteractions, totalNonInteractions)
     selectedInteractions, selectedNonInteractions = splitter(100, 100, totalInteractions, totalNonInteractions)
 
     results = crossValidation(drugDic, diseaseSim, selectedInteractions, selectedNonInteractions)
