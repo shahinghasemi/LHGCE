@@ -3,6 +3,7 @@ import numpy as np
 import scipy.io as sio
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
+from GCN import GCNEmbedding
 
 
 # def Cosine(matrix)
@@ -14,7 +15,8 @@ def Jaccard(matrix):
 
 def readFromMat():
     data = sio.loadmat('./data/SCMFDD_Dataset.mat')
-    print(data.keys())
+    
+    np.savetxt('./drugDrug_feature_matrix.txt', np.array(data['drug_drug_interaction_feature_matrix']))
     np.savetxt('./structure_feature_matrix.txt', np.array(data['structure_feature_matrix']))
     np.savetxt('./target_feature_matrix.txt', np.array(data['target_feature_matrix']))
     np.savetxt('./enzyme_feature_matrix.txt', np.array(data['enzyme_feature_matrix']))
@@ -41,6 +43,13 @@ def prepareDrugData(featureList, embeddingMethod):
     if embeddingMethod == 'AE' or embeddingMethod == 'matrix':
         finalDic = featureMatrixDic;
 
+    elif embeddingMethod == 'jaccardGCN':
+        for feature, matrix in featureMatrixDic.items():
+            jacMatrix = Jaccard(matrix)
+            # remove self loops
+            embedding = GCNEmbedding(jacMatrix, matrix, 100, 0.001)
+            finalDic[feature] = embedding
+
     elif embeddingMethod == 'jaccard':
         for feature, matrix in featureMatrixDic.items():
             finalDic[feature] = Jaccard(matrix)
@@ -53,7 +62,6 @@ def prepareDrugData(featureList, embeddingMethod):
     else:
         exit('please provide a known embedding method')
     # elif similarity == 'cosine':
-    
     return finalDic
 
 

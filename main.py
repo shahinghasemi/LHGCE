@@ -6,7 +6,6 @@ from metrics import calculateMetric, labelBasedMetrics
 import argparse
 from sklearn.svm import OneClassSVM
 
-
 # For reproducibility
 torch.manual_seed(0)
 np.random.seed(0)
@@ -77,27 +76,26 @@ def crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions
                 XTrain.append(drug)
                 involvedDiseases.append(diseaseSim[diseaseIndex])
                 YTrain.append([1])
+
+            interactions = len(YTrain)
+            print('train: interactions: ', interactions)
                 
             for drugIndex, diseaseIndex in totalNonInteractions:
                 drug = drugDic[FEATURE_LIST[featureIndex]][drugIndex]
                 XTrain.append(drug)
                 involvedDiseases.append(diseaseSim[diseaseIndex])
                 YTrain.append([0])
-            # we won't use non interactions in training phase
-            interactions = len(YTrain)
-            print('train: interactions: ', interactions)
+            print('train: nonInteractions: ', len(YTrain) - interactions)
 
             allDataDic[FEATURE_LIST[featureIndex]] = np.array(XTrain)
         
         YTrain = np.array(YTrain)
         allDataDic['diseases'] = np.array(involvedDiseases)
-
         XTrain = makeX(allDataDic, AGGREGATION)
-
         allDataDic = {} 
         allDataDic['y'] = YTrain
         allDataDic['X'] = XTrain
-        
+
         if CLASSIFIER == 'MAFCN':
             trainedModel = trainFNN(allDataDic, EPOCHS, BATCHSIZE, DROPOUT, LEARNING_RATE)
         if CLASSIFIER == 'OCC':
@@ -131,11 +129,10 @@ def crossValidation(drugDic, diseaseSim, totalInteractions, totalNonInteractions
 
         YTest = np.array(YTest)
         allDataDic['diseases'] = np.array(involvedDiseases)
-
         XTest = makeX(allDataDic, AGGREGATION)
-
         allDataDic = {} 
         allDataDic['X'] = XTest
+
         if CLASSIFIER == 'MAFCN':
             y_pred_prob = testFNN(trainedModel, allDataDic).detach().numpy()
             metric = np.array(calculateMetric(YTest, y_pred_prob, THRESHOLD_PERCENT))
@@ -240,7 +237,7 @@ def main():
     totalInteractions = np.array(np.mat(np.where(drugDisease == 1)).T) #(18416, 2)
     totalNonInteractions = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
     
-    makePlotData(drugDic, totalInteractions, totalNonInteractions)
+    # makePlotData(drugDic, totalInteractions, totalNonInteractions)
     selectedInteractions, selectedNonInteractions = splitter(100, 100, totalInteractions, totalNonInteractions)
 
     results = crossValidation(drugDic, diseaseSim, selectedInteractions, selectedNonInteractions)

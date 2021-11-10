@@ -79,8 +79,7 @@ def trainFNN(dataDic, nEpochs, nBatchsize, dropout, lr):
             # scheduler.step()
 
         if epoch % 4 == 0:
-            print('------------------- epoch: ', epoch, ' -------------------')
-            print('-> batchLoss: ', batchLoss.item())
+            print('-> epoch: ', epoch, 'DNN batchLoss: ', batchLoss.item())
 
     return model
 
