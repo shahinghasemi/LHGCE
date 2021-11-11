@@ -1,17 +1,17 @@
-import torch
-from torch._C import dtype
+import numpy as np
 
-X = [
-    [0, 0, 0],
-    [1, 2, 4],
-    [0, 0, 4]
-]
-# tensorred = torch.inverse(torch.tensor(X, dtype=float))
+first  = [0.02957132, 0.52860426, 0.05648131, 0.82989571, 0.20200923, 0.84613009, 0.03283029]
+second  = [0.02664616, 0.52882705, 0.05353202, 0.47755393, 0.5862069,  0.47474464, 0.02804661]
+third  = [0.0352362,  0.56017868, 0.05927544, 0.65224324, 0.43469997, 0.65786795, 0.03180626]
+fourth  = [0.05049661, 0.57933278, 0.06268143, 0.73925599, 0.34591366, 0.74942609, 0.03446317]
 
-# print(tensorred)
+first = np.array(first)
+second = np.array(second)
+third = np.array(third)
+fourth = np.array(fourth)
 
-import numpy as np 
 
-ndArr = np.array(X) 
-inversed = np.linalg.inv(ndArr) 
-print('inversed: ', inversed)
+print((first + second + third + fourth) / 4)
+
+
+[0.03548757 0.54923569 0.05799255 0.67473722 0.39220744 0.68204219 0.03178658]

@@ -71,7 +71,7 @@ def trainFNN(dataDic, nEpochs, nBatchsize, dropout, lr):
             optimizer.step()
             # scheduler.step()
 
-        if epoch % 5 == 0:
+        if epoch % 10 == 0:
             print('-> epoch: ', epoch, 'DNN batchLoss: ', batchLoss.item())
             # for name, param in model.named_parameters():
                 # print('-> model parameters: ', name, '=', param)

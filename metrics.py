@@ -9,6 +9,7 @@ def calculateMetric(real_score, predict_score, thresholdPercent):
     thresholds = thresholdCalculation(predict_score, thresholdPercent)
     thresholds = np.mat(thresholds)
     thresholds_num = thresholds.shape[1]
+    print('number of thresholds: ', thresholds_num)
     # ----------------------------- #
     predict_score_matrix = np.tile(predict_score, (thresholds_num, 1))
     negative_index = np.where(predict_score_matrix < thresholds.T)
