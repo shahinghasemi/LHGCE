@@ -1,53 +1,30 @@
-import torch
-from torch import tensor
-import torch.nn as nn
-import numpy as np
-
-def binaryCrossEntropyLoss(pred, Y, weights):
-    firstPart = Y * np.log(pred)
-    print('firstPart: ', firstPart)
-    secondPart = (1 - Y) * np.log(1 - pred)
-    print('secondPart: ', secondPart)
-    summation = weights[0] * firstPart + weights[1] * secondPart
-    print('summation: ', summation)
-    return - np.mean(summation)
-
-Y = np.array([1, 0, 0])
-goodPred = np.array([0.95, 0.025, 0.025])
-badPred = np.array([0.20, 0.68, 0.12])
-
-
-lossWeighted = nn.BCELoss(weight=torch.tensor([0.33, 0.66, 0.66]))
-lossNotWeighted = nn.BCELoss()
-
-goodPred = torch.tensor(goodPred, dtype=torch.float64)
-badPred = torch.tensor(badPred, dtype=torch.float64)
-
-Y = torch.tensor(Y, dtype=torch.float64)
-lossBad = lossWeighted(badPred, Y)
-lossWeightedBad = lossNotWeighted(badPred, Y)
-print('lossBad:', lossBad)
-print('lossWeightedBad:', lossWeightedBad)
-
-
-# m = nn.Sigmoid()
-# loss = nn.BCELoss()
-# input = torch.randn(3, requires_grad=True)
-# print('input:', input)
-# target = torch.empty(3).random_(2)
-# print(target)
-# output = loss(m(input), target)
-# print(output)
-# output.backward()
-
-
-# binaryCrossEntropyLoss(goodPred, Y, [1, 1])
-# print('------------------')
-# binaryCrossEntropyLoss(badPred, Y, [1, 1])
-# print('------------------')
-# print('::::::weighted::::::')
-# binaryCrossEntropyLoss(goodPred, Y, [1.5, 1])
-# print('------------------')
-# binaryCrossEntropyLoss(badPred, Y, [1.5, 1])
-# print('------------------')
-# print('::::::weighted::::::')
+import matplotlib.pyplot as plt 
+X = [0 ,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60,64,68,72,76, 80, 84, 88, 92]
+loss = [
+    0.6313493847846985 ,
+0.4102489948272705 ,
+0.2701847553253174 ,
+ 0.3712649643421173,
+ 0.3177189528942108,
+ 0.415380597114563 ,
+ 0.4472213089466095,
+ 0.266013503074646 ,
+ 0.3506158292293548,
+ 0.4566053450107574,
+ 0.2540217638015747,
+ 0.1730746179819107,
+ 0.0883747264742851,
+ 0.5310120582580566,
+ 0.3152799010276794,
+ 0.3901490271091461,
+ 0.2998975217342376,
+ 0.3236114084720611,
+ 0.3569098114967346,
+ 0.4191709458827972,
+ 0.273139089345932,
+ 0.372970849275589,
+ 0.2541218101978302,
+0.31327202916145325,
+]
+plt.plot(X, loss)
+plt.show()

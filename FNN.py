@@ -8,42 +8,43 @@ class FCNN(nn.Module):
         self.DNN = nn.Sequential(
             nn.Linear(inputShape, 128),
             nn.BatchNorm1d(128),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.Dropout(dropout),
             nn.Linear(128, 32),
             nn.BatchNorm1d(32),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.Dropout(dropout),
             nn.Linear(32, 4),
             nn.BatchNorm1d(4),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.Dropout(dropout),
             nn.Linear(4, 1),
+            nn.LeakyReLU(),
         )
-        self.encoder = nn.Sequential(
-            nn.Linear(inputShape, 128),
-            nn.BatchNorm1d(128),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(128, 64),
-            nn.BatchNorm1d(64),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(64, 32),
-            nn.ReLU(),
-        )
-        self.decoder = nn.Sequential(
-            nn.Linear(32, 64),
-            nn.BatchNorm1d(64),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(64, 128),
-            nn.BatchNorm1d(128),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(128, inputShape),
-            nn.ReLU(),
-        )
+        # self.encoder = nn.Sequential(
+        #     nn.Linear(inputShape, 128),
+        #     nn.BatchNorm1d(128),
+        #     nn.ReLU(),
+        #     nn.Dropout(dropout),
+        #     nn.Linear(128, 64),
+        #     nn.BatchNorm1d(64),
+        #     nn.ReLU(),
+        #     nn.Dropout(dropout),
+        #     nn.Linear(64, 32),
+        #     nn.ReLU(),
+        # )
+        # self.decoder = nn.Sequential(
+        #     nn.Linear(32, 64),
+        #     nn.BatchNorm1d(64),
+        #     nn.ReLU(),
+        #     nn.Dropout(dropout),
+        #     nn.Linear(64, 128),
+        #     nn.BatchNorm1d(128),
+        #     nn.ReLU(),
+        #     nn.Dropout(dropout),
+        #     nn.Linear(128, inputShape),
+        #     nn.ReLU(),
+        # )
         
     def forward(self, x):
         return self.DNN(x)
@@ -70,8 +71,10 @@ def trainFNN(dataDic, nEpochs, nBatchsize, dropout, lr):
             optimizer.step()
             # scheduler.step()
 
-        if epoch % 4 == 0:
+        if epoch % 5 == 0:
             print('-> epoch: ', epoch, 'DNN batchLoss: ', batchLoss.item())
+            # for name, param in model.named_parameters():
+                # print('-> model parameters: ', name, '=', param)
 
     return model
 
