@@ -10,10 +10,16 @@ class GCNConv(nn.Module):
         self.D     = torch.diag(torch.sum(A,1))
         self.D     = self.D.inverse().sqrt()
         self.A_hat = torch.mm(torch.mm(self.D, self.A_hat), self.D)
-        self.W     = nn.Parameter(torch.rand(in_channels,out_channels, dtype=float))
-    
+        
+        self.W = torch.empty(in_channels, out_channels, dtype=float)
+        nn.init.xavier_uniform_(self.W, gain=nn.init.calculate_gain('relu'))
+        self.W = nn.Parameter(self.W)
+
     def forward(self, X):
+
         out = torch.relu(torch.mm(torch.mm(self.A_hat, X), self.W))
+        dropout = nn.Dropout(p=0.4)
+        out = dropout(out)
         # out = torch.nn.Dropout(0.4)
         # out = torch.nn.BatchNorm1d(out)
         return out

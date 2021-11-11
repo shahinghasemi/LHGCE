@@ -1,18 +1,17 @@
 import torch
 from torch._C import dtype
 
-out = torch.eye(5)
-print('out: ', out)
+X = [
+    [0, 0, 0],
+    [1, 2, 4],
+    [0, 0, 4]
+]
+# tensorred = torch.inverse(torch.tensor(X, dtype=float))
 
-adj = torch.tensor([
-    [0, 0, 1, 1],
-    [0, 0, 1, 0],
-    [1, 1, 0, 0],
-    [1, 0, 0, 0]
-], dtype=float)
+# print(tensorred)
 
-diagonal = torch.diag(torch.sum(adj, 1))
-print('diagonal: ', diagonal)
-out = diagonal.inverse().sqrt()
-print('out: ', out)
+import numpy as np 
 
+ndArr = np.array(X) 
+inversed = np.linalg.inv(ndArr) 
+print('inversed: ', inversed)
