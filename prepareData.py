@@ -47,7 +47,7 @@ def prepareDrugData(featureList, embeddingMethod):
         for feature, matrix in featureMatrixDic.items():
             jacMatrix = Jaccard(matrix)
             # remove self loops
-            embedding = GCNEmbedding(jacMatrix, matrix, 100, 0.001)
+            embedding = GCNEmbedding(jacMatrix, matrix, 50, 0.001)
             finalDic[feature] = embedding
 
     elif embeddingMethod == 'jaccard':

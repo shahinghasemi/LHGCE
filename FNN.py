@@ -59,7 +59,7 @@ def trainFNN(dataDic, nEpochs, nBatchsize, dropout, lr):
     for epoch in range(nEpochs):
         indices = np.random.permutation(labels.shape[0])
         for boundary in range(0, len(indices), nBatchsize):
-            batchIndex = indices[boundary:boundary + nBatchsize]
+            batchIndex = indices[boundary: boundary + nBatchsize]
             batchLoss = 0
             XTrain = X[batchIndex].float()
             y_pred = model(XTrain)

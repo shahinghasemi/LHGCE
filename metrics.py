@@ -73,6 +73,7 @@ def thresholdCalculation(predict_score, percent):
     # _fpr, _tpr, thresholds = roc_curve(real_score, predict_score)
     # thresholds = np.mat(thresholds)
     # thresholds_num = thresholds.shape[1]
+    print('predict_score: ', predict_score, 'shape: ', predict_score.shape)
     sorted_predict_score = np.array(sorted(list(set(np.array(predict_score).flatten()))))
     sorted_predict_score_num = len(sorted_predict_score)
     print('number of unique prediction: ',sorted_predict_score_num, sorted_predict_score)
