@@ -3,5 +3,5 @@
 | GCN()-> DNN() + leakyReLU in DNN | all nonInteractions for both train and test + k-1/k interactions for train and 1/k for test| e, p, t, s | 5 | adam | jaccardGCN | sum | 64 | 100 | 0.4 | 0.0001 | 67.4% | 54.9% | 5.7% | 3.5% | 39.2% | 68.2% | 3.1% 
 | GCN()-> DNN() + leakyReLU in DNN | all nonInteractions for both train and test + k-1/k interactions for train and 1/k for test | e, p, t, s | 5 | adam | jaccardGCN | sum | 64 | 100 | 0.4 | 0.0005 | 49.6% | 55.4% | 5.8% | 3.2% | 59.4% | 49.3% | 3.3%
 | GCN() -> DNN() + leakyReLU in DNN | all nonInteractions for both train and test + k-1/k interactions for train and 1/k for test | e, p, t, s| 5 | adam | jaccardGCN | sum | 64 | 300 | 0.4 | 0.0005 | 26.2% | 50.5% | 5.1% | 2.9% | 79% | 24.8% | 2.6% 
-| GCN() -> DNN() + leakyReLU in DNN | all nonInteractions for both train and test + k-1/k interactions for train and 1/k for test | e, p, t, s| 5 | adam | jaccard | sum | 64 | 100 | 0.4 | 0.0005 | 
-
+| GCN() -> DNN() + leakyReLU in DNN | all nonInteractions for both train and test + k-1/k interactions for train and 1/k for test | e, p, t, s| 5 | adam | jaccard | sum | 64 | 100 | 0.4 | 0.0005 | 74.3% | 59.1% | 7.4% | 5.5% | 35.2% | 75.4% | 4.4% 
+| GCN() -> DNN() + leakyReLU in DNN + stepLR(opt, 20, gamma=0.01) in DNN | all nonInteractions for both train and test + k-1/k interactions for train and 1/k for test | e, p, t, s| 5 | adam | jaccard | sum | 64 | 100 | 0.4 | 0.01 | 

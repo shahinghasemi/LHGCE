@@ -70,6 +70,7 @@ def trainFNN(dataDic, nEpochs, nBatchsize, dropout, lr):
             batchLoss.backward()
             optimizer.step()
         scheduler.step()
+        print('last LR: ', scheduler.get_last_lr())
 
         if epoch % 10 == 0:
             print('-> epoch: ', epoch, 'DNN batchLoss: ', batchLoss.item())
