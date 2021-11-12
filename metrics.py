@@ -81,6 +81,9 @@ def thresholdCalculation(predict_score, percent):
     numberOfThresholds = round(sorted_predict_score_num * percent/100)
     if numberOfThresholds == 0:
         return sorted_predict_score[0]
+    if numberOfThresholds < 1000: 
+        numberOfThresholds = 1000
+        print('number of threshods was lesser than 1000 so it now is set to 1000 manually to increase performance of the model')
     steps = sorted_predict_score_num // numberOfThresholds
     indexes = steps * np.arange(numberOfThresholds)
     thresholds = sorted_predict_score[indexes]
