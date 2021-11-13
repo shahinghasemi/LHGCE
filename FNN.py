@@ -6,15 +6,15 @@ class FCNN(nn.Module):
     def __init__(self, inputShape, dropout):
         super(FCNN, self).__init__()
         self.DNN = nn.Sequential(
-            nn.Linear(inputShape, 128),
-            nn.BatchNorm1d(128),
-            nn.LeakyReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(128, 32),
+            nn.Linear(inputShape, 32),
             nn.BatchNorm1d(32),
             nn.LeakyReLU(),
             nn.Dropout(dropout),
-            nn.Linear(32, 4),
+            nn.Linear(32, 16),
+            nn.BatchNorm1d(16),
+            nn.LeakyReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(16, 4),
             nn.BatchNorm1d(4),
             nn.LeakyReLU(),
             nn.Dropout(dropout),
@@ -55,8 +55,7 @@ def trainFNN(dataDic, nEpochs, nBatchsize, dropout, lr):
     model = FCNN(X.shape[1], dropout)
     # should add weighted loss
     BCELoss = nn.BCEWithLogitsLoss()
-    optimizer = torch.optim.Adadelta(model.parameters())
-    # optimizer = torch.optim.Adam(model.parameters(), lr = lr)
+    optimizer = torch.optim.Adam(model.parameters(), lr = lr)
     # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 20, gamma=0.01)
     for epoch in range(nEpochs):
         indices = np.random.permutation(labels.shape[0])
