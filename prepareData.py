@@ -15,7 +15,8 @@ def Jaccard(matrix):
 
 def readFromMat():
     data = sio.loadmat('./data/SCMFDD_Dataset.mat')
-    
+    print('data.keys(): ', data.keys())
+
     np.savetxt('./drugDrug_feature_matrix.txt', np.array(data['drug_drug_interaction_feature_matrix']))
     np.savetxt('./structure_feature_matrix.txt', np.array(data['structure_feature_matrix']))
     np.savetxt('./target_feature_matrix.txt', np.array(data['target_feature_matrix']))

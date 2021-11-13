@@ -62,7 +62,6 @@ def GCNEmbedding(A, X, nEpochs, lr):
         batchLoss += GCNAELoss
         batchLoss.backward()
         optimizer.step()
-
         if epoch % 4 == 0:
             print('-> epoch: ', epoch, 'GCN batchLoss: ', batchLoss.item())
 

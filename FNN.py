@@ -55,8 +55,9 @@ def trainFNN(dataDic, nEpochs, nBatchsize, dropout, lr):
     model = FCNN(X.shape[1], dropout)
     # should add weighted loss
     BCELoss = nn.BCEWithLogitsLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr = lr)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 20, gamma=0.01)
+    optimizer = torch.optim.Adadelta(model.parameters())
+    # optimizer = torch.optim.Adam(model.parameters(), lr = lr)
+    # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 20, gamma=0.01)
     for epoch in range(nEpochs):
         indices = np.random.permutation(labels.shape[0])
         for boundary in range(0, len(indices), nBatchsize):
@@ -69,8 +70,8 @@ def trainFNN(dataDic, nEpochs, nBatchsize, dropout, lr):
             batchLoss += dnnLoss
             batchLoss.backward()
             optimizer.step()
-        scheduler.step()
-        print('last LR: ', scheduler.get_last_lr())
+        # scheduler.step()
+        # print('last LR: ', scheduler.get_last_lr())
 
         if epoch % 10 == 0:
             print('-> epoch: ', epoch, 'DNN batchLoss: ', batchLoss.item())
