@@ -16,7 +16,6 @@ class GCNConv(nn.Module):
         self.W = nn.Parameter(self.W)
 
     def forward(self, X):
-
         out = torch.relu(torch.mm(torch.mm(self.A_hat, X), self.W))
         dropout = nn.Dropout(p=0.4)
         out = dropout(out)
@@ -28,16 +27,14 @@ class GCNAE(torch.nn.Module):
     def __init__(self,A, nFeatures):
         super(GCNAE, self).__init__()
         self.Encoder = nn.Sequential(
-            GCNConv(A,nFeatures, 512),
-            GCNConv(A,512, 256),
-            GCNConv(A,256, 128),
-            GCNConv(A,128, 64)
+            GCNConv(A,nFeatures, 128),
+            GCNConv(A,128, 64),
+            GCNConv(A,64, 32),
         )
         self.Decoder = nn.Sequential(
+            GCNConv(A,32, 64),
             GCNConv(A,64, 128),
-            GCNConv(A,128, 256),
-            GCNConv(A,256, 512),
-            GCNConv(A,512, nFeatures)
+            GCNConv(A,128, nFeatures),
         )
         
     def forward(self,X):

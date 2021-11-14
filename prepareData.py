@@ -60,6 +60,15 @@ def prepareDrugData(featureList, embeddingMethod):
             pca = PCA(n_components=2,)
             transformed = pca.fit_transform(matrix)
             finalDic[feature] = transformed
+
+    elif embeddingMethod == 'diseaseGCN':
+        diseaseSim = np.loadtxt('./data/dis_sim.csv', delimiter=',')
+        drugDisease = np.loadtxt('./data/drug_dis.csv', delimiter=',')
+        drugDisease = np.transpose(drugDisease)
+        embedding = GCNEmbedding(diseaseSim, drugDisease, 300, 0.0001)
+        np.savetxt('./diseaseGCN_feature_matrix.txt', np.array(embedding))
+        exit()
+
     else:
         exit('please provide a known embedding method')
     # elif similarity == 'cosine':

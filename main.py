@@ -233,7 +233,7 @@ def main():
     drugDic = prepareDrugData(FEATURE_LIST, EMBEDDING)
     drugDisease = np.loadtxt('./data/drug_dis.csv', delimiter=',')
     diseaseSim = np.loadtxt('./data/dis_sim.csv', delimiter=',')
-
+    diseaseSim = 0.6 * diseaseSim
     totalInteractions = np.array(np.mat(np.where(drugDisease == 1)).T) #(18416, 2)
     totalNonInteractions = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
     
