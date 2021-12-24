@@ -1,5 +1,5 @@
 import torch
-from prepareData import prepareDrugData, plotAndSave
+import prepareData
 import numpy as np
 from FNN import trainFNN, testFNN
 from metrics import calculateMetric, labelBasedMetrics
@@ -180,23 +180,6 @@ def makeX(dataDic, aggregation='concatenate'):
     X = torch.cat((X, diseases), 1)
     return X
 
-def splitter(interactionsPercent, nonInteractionsPercent, totalInteractions, totalNonInteractions, folds=5):
-    interactionSelectionSize = round(interactionsPercent/100 * INTERACTIONS_NUMBER)
-    nonInteractionSelectionSize = round(nonInteractionsPercent/100 * NONINTERACTIONS_NUMBER)
-
-    # remove some samples to be dividable by the folds
-    interactionSelectionSize = interactionSelectionSize - (interactionSelectionSize % folds)
-    nonInteractionSelectionSize = nonInteractionSelectionSize - (nonInteractionSelectionSize % folds)
-
-    # choose randomly
-    interactionsIndices = np.random.choice(INTERACTIONS_NUMBER, interactionSelectionSize)
-    nonInteractionsIndices = np.random.choice(NONINTERACTIONS_NUMBER, nonInteractionSelectionSize)
-
-    selectedNonInteractions = totalNonInteractions[nonInteractionsIndices]
-    selectedInteractions = totalInteractions[interactionsIndices]
-
-    return selectedInteractions, selectedNonInteractions
-
 def makePlotData(drugDic, totalInteractions, totalNonInteractions):
     for featureIndex in range(len(FEATURE_LIST)):
         positives = []
@@ -223,14 +206,14 @@ def makePlotData(drugDic, totalInteractions, totalNonInteractions):
         X = np.array(X)
         Y = np.array(Y)
 
-        plotAndSave(X, Y, labels, FEATURE_LIST[featureIndex])
+        prepareData.plotAndSave(X, Y, labels, FEATURE_LIST[featureIndex])
     
     return X, Y, labels
 
 def main():
     print('nDrugs: ', DRUG_NUMBER)
     print('nDisease: ', DISEASE_NUMBER)
-    drugDic = prepareDrugData(FEATURE_LIST, EMBEDDING)
+    drugDic = prepareData.prepareDrugData(FEATURE_LIST, EMBEDDING)
     drugDisease = np.loadtxt('./data/drug_dis.csv', delimiter=',')
     diseaseSim = np.loadtxt('./data/dis_sim.csv', delimiter=',')
     diseaseSim = 0.6 * diseaseSim
@@ -238,7 +221,7 @@ def main():
     totalNonInteractions = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
     
     # makePlotData(drugDic, totalInteractions, totalNonInteractions)
-    selectedInteractions, selectedNonInteractions = splitter(100, 100, totalInteractions, totalNonInteractions)
+    selectedInteractions, selectedNonInteractions = prepareData.splitter(100, 100, totalInteractions, totalNonInteractions)
 
     results = crossValidation(drugDic, diseaseSim, selectedInteractions, selectedNonInteractions)
     print('results: ', results / FOLDS)

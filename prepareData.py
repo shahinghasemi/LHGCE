@@ -1,9 +1,21 @@
-import matplotlib
+# import matplotlib
 import numpy as np
 import scipy.io as sio
 from sklearn.decomposition import PCA
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
+import torch
 from GCN import GCNEmbedding
+from torch_geometric.data import HeteroData
+
+DRUG_NUMBER = 269
+DISEASE_NUMBER = 598
+ENZYME_NUMBER = 108
+STRUCTURE_NUMBER = 881
+PATHWAY_NUMBER = 258
+TARGET_NUMBER = 529
+INTERACTIONS_NUMBER = 18416
+NONINTERACTIONS_NUMBER = 142446
+FOLDS = 5
 
 
 # def Cosine(matrix)
@@ -32,6 +44,79 @@ def plotAndSave(X, Y, labels, feature):
     plt.grid()
     plt.legend()
     plt.show()
+
+def splitter(interactionsPercent, nonInteractionsPercent, interactions, nonInteractions, folds=5):
+    interactionSelectionSize = round(interactionsPercent/100 * INTERACTIONS_NUMBER)
+    nonInteractionSelectionSize = round(nonInteractionsPercent/100 * NONINTERACTIONS_NUMBER)
+
+    # remove some samples to be dividable by the folds
+    interactionSelectionSize = interactionSelectionSize - (interactionSelectionSize % folds)
+    nonInteractionSelectionSize = nonInteractionSelectionSize - (nonInteractionSelectionSize % folds)
+
+    # choose randomly
+    interactionsIndices = np.random.choice(INTERACTIONS_NUMBER, interactionSelectionSize)
+    nonInteractionsIndices = np.random.choice(NONINTERACTIONS_NUMBER, nonInteractionSelectionSize)
+
+    selectedNonInteractions = nonInteractions[nonInteractionsIndices]
+    selectedInteractions = interactions[interactionsIndices]
+    return selectedInteractions, selectedNonInteractions
+
+def foldify(totalInteractions, totalNonInteractions):
+    sizeOfInteractions = totalInteractions.shape[0]
+    sizeOfNonInteractions = totalNonInteractions.shape[0]
+
+    totalInteractionIndices = np.random.permutation(sizeOfInteractions)
+    totalNonInteractionIndices = np.random.permutation(sizeOfNonInteractions)
+
+    interactionsIndicesFolds = totalInteractionIndices.reshape(FOLDS, sizeOfInteractions // FOLDS)
+    nonInteractionsIndicesFolds = totalNonInteractionIndices.reshape(FOLDS, sizeOfNonInteractions // FOLDS)
+
+    return interactionsIndicesFolds, nonInteractionsIndicesFolds
+
+def makeNegEdgeIndex(name, isCSV=False):
+    if isCSV:
+        matrix = np.loadtxt('./data/drug_' + name + '.csv', delimiter=',')
+    else:
+        matrix = np.loadtxt('./data/drug_' + name + '.txt')
+    result = np.where(matrix == 0)
+    edgeIndex = [[], []]
+    for index in result[0]:
+        edgeIndex[0].append(index)
+    for index in result[1]:
+        edgeIndex[1].append(index)
+
+    edgeIndex = torch.tensor(edgeIndex, dtype=torch.long)
+    return edgeIndex
+
+def makePosEdgeIndex(name, isCSV=False):
+    if isCSV:
+        matrix = np.loadtxt('./data/drug_' + name + '.csv', delimiter=',')
+    else:
+        matrix = np.loadtxt('./data/drug_' + name + '.txt')
+    result = np.where(matrix == 1)
+    edgeIndex = [[], []]
+    for index in result[0]:
+        edgeIndex[0].append(index)
+    for index in result[1]:
+        edgeIndex[1].append(index)
+
+    edgeIndex = torch.tensor(edgeIndex, dtype=torch.long)
+    return edgeIndex
+
+def createHeteroNetwork(keys):
+    data = HeteroData()
+
+    data['drug'].x = torch.eye(DRUG_NUMBER, dtype=torch.float)
+    data['disease'].x = torch.tensor(np.loadtxt('./data/dis_sim.csv', delimiter=','), dtype=torch.float)
+    data['pathway'].x = torch.eye(PATHWAY_NUMBER)
+    data['enzyme'].x = torch.eye(ENZYME_NUMBER)
+    data['structure'].x = torch.eye(STRUCTURE_NUMBER)
+    data['target'].x = torch.eye(TARGET_NUMBER)
+
+    for key in keys:
+        data['drug', 'edge', key].edge_index = makePosEdgeIndex(key)
+
+    return data
 
 def prepareDrugData(featureList, embeddingMethod):
     featureMatrixDic = {}

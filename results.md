@@ -8,5 +8,6 @@
 | GCN() -> DNN() + leakyReLU in DNN | all nonInteractions for both train and test + k-1/k interactions for train and 1/k for test | e, p, t, s| 5 | AdaDelta | jaccardGCN | sum | 64 | 100 | 0.4 | - | 2.5% | 50% | 4.9% | 100% | 0% | 2.5%
 | GCN() -> DNN() + leakyReLU in DNN + reduced DNN from input-128-32-4-1 to input-32-16-4-1 | all nonInteractions for both train and test + k-1/k interactions for train and 1/k for test | e, p, t, s| 5 | Adam | jaccardGCN | sum | 64 | 100 | 0.4 | 0.0005 | 63.7% | 54.5% | 5.8% | 3.6% | 40.5% | 64.3% | 3.4% 
 | GCN() -> DNN() + leakyReLU in DNN + reduced DNN from input-128-32-4-1 to input-32-16-4-1 | all nonInteractions for both train and test + k-1/k interactions for train and 1/k for test | e, p, t, s| 5 | Adam | matrix | conc | 64 | 100 | 0.4 | 0.0005 | 69.3% | 58.2% | 7.2% | 4.3% | 40% | 70% | 4.3%
+| GCN() -> DNN() + leakyReLU in DNN + reduced DNN from input-128-32-4-1 to input-32-16-4-1 + 0.6 * diseaseSim | all nonInteractions for both train and test + k-1/k interactions for train and 1/k for test | e, p, t, s| 5 | Adam | matrix | conc | 64 | 100 | 0.4 | 0.0005 | 57.9% | 56.9% | 6.9% | 4.1% | 50.2% | 58.1% | 4.1% |
 
-[0.04302957 0.58239643 0.07299121 0.69302666 0.40054304 0.700589 0.04372223]
+[0.04141702 0.56982838 0.06999619 0.579778   0.50214499 0.58178525 0.04192702]

@@ -2,11 +2,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch 
 
-tensor = torch.tensor([
+z = torch.tensor([
     [2, 1], 
-    [6, 3]
+    [6, 3],
+    [4, 5],
+    [7, 8]
 ], dtype=float)
 
-print(tensor.inverse())
-print(torch.linalg.inv(tensor))
-print(torch.linalg.pinv(tensor))
+
+value = (z[[0, 1, 0, 2]] * z[[1, 0, 0, 3]])
+print('value: ', value)
