@@ -22,7 +22,7 @@ TARGET_NUMBER = 529
 INTERACTIONS_NUMBER = 18416
 NONINTERACTIONS_NUMBER = 142446
 FOLDS = 5
-EPOCHS = 500
+EPOCHS = 2
 
 class GNNEncoder(torch.nn.Module):
     def __init__(self, hidden_channels, out_channels):
@@ -79,7 +79,7 @@ def test(test_data, model):
     pred = pred.detach().numpy()
     edge_label = test_data['drug','treats', 'disease'].edge_label.detach().numpy()
 
-    metrics = calculateMetric(edge_label, pred, 4)
+    metrics = calculateMetric(edge_label, pred, 3)
     return metrics
 
 
@@ -93,20 +93,24 @@ def main():
     interactionsIndicesFolds, nonInteractionsIndicesFolds = prepareData.foldify(selectedInteractions, selectedNonInteractions)
 
     data = prepareData.createHeteroNetwork(['pathway', 'target', 'structure', 'enzyme'])
-    data['drug', 'treats', 'disease'].edge_index = prepareData.makePosEdgeIndex('disease', True)
+
+    metrics = np.zeros(7)
 
     for k in range(FOLDS):
-        testInteractionsIndex = interactionsIndicesFolds[k]
-        trainInteractionsIndex = np.setdiff1d(interactionsIndicesFolds.flatten(), testInteractionsIndex, assume_unique=True)
+        messageEdgesIndex, superVisionEdgesIndex, testEdgesIndex = prepareData.splitEdgesBasedOnFolds(interactionsIndicesFolds, k)
 
-        testNonInteractionsIndex = nonInteractionsIndicesFolds[k]
-        trainNonInteractionsIndex = np.setdiff1d(nonInteractionsIndicesFolds.flatten(), testNonInteractionsIndex, assume_unique=True)
+        edge_index = [[], []]
+        for drugIndex, diseaseIndex in selectedInteractions[messageEdgesIndex]:
+            edge_index[0].append(drugIndex)
+            edge_index[1].append(diseaseIndex)
+        edge_index = torch.tensor(edge_index, dtype=torch.long)
+        data['drug', 'treats', 'disease'].edge_index = edge_index
 
         # Training
         edge_label_index = [[], []]
         neg_edge_index = [[], []]
         edge_label = []
-        for drugIndex, diseaseIndex in selectedInteractions[trainInteractionsIndex]:
+        for drugIndex, diseaseIndex in selectedInteractions[superVisionEdgesIndex]:
             edge_label_index[0].append(drugIndex)
             edge_label_index[1].append(diseaseIndex)
             edge_label.append(1)
@@ -137,13 +141,14 @@ def main():
         criterion = torch.nn.BCEWithLogitsLoss()
         for epoch in range(1, EPOCHS):
             loss = train(data, model, optimizer, criterion)
-            print('epoch: ', epoch, 'train loss: ', loss)
+            if epoch % 10 == 0:
+                print('epoch: ', epoch, 'train loss: ', loss)
         
         # Testing
         edge_label_index = [[], []]
         neg_edge_index = [[], []]
         edge_label = []
-        for drugIndex, diseaseIndex in selectedInteractions[testInteractionsIndex]:
+        for drugIndex, diseaseIndex in selectedInteractions[testEdgesIndex]:
             edge_label_index[0].append(drugIndex)
             edge_label_index[1].append(diseaseIndex)
             edge_label.append(1)
@@ -159,6 +164,10 @@ def main():
         data['drug', 'treats', 'disease'].edge_label = edge_label
         
         metric = test(data, model)
-        print('metric: ', metric)
+        metrics += metric
 
-main()
+        print('metric: ', metric)
+    return metrics
+
+metrics = main()
+print('results: ', metrics / FOLDS)

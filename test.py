@@ -1,14 +1,9 @@
-import matplotlib.pyplot as plt 
 import numpy as np
 import torch 
 
-z = torch.tensor([
-    [2, 1], 
-    [6, 3],
-    [4, 5],
-    [7, 8]
-], dtype=float)
 
+first = np.array([1, 2, 3])
+second = np.array([4, 5, 6])
 
-value = (z[[0, 1, 0, 2]] * z[[1, 0, 0, 3]])
-print('value: ', value)
+result = np.concatenate((first, second), axis=0)
+print('result: ', result)

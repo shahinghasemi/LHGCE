@@ -45,6 +45,16 @@ def plotAndSave(X, Y, labels, feature):
     plt.legend()
     plt.show()
 
+def splitEdgesBasedOnFolds(interactionsIndicesFolds, k):
+    testEdgesIndex = interactionsIndicesFolds[k]
+    if(k+1 == FOLDS):
+        k = 0
+    superVisionEdgesIndex = interactionsIndicesFolds[k+1]
+    usedIndices = np.concatenate((testEdgesIndex, superVisionEdgesIndex), axis=0)
+    messageEdgesIndex = np.setdiff1d(interactionsIndicesFolds.flatten(), usedIndices, assume_unique=True)
+
+    return messageEdgesIndex, superVisionEdgesIndex, testEdgesIndex
+
 def splitter(interactionsPercent, nonInteractionsPercent, interactions, nonInteractions, folds=5):
     interactionSelectionSize = round(interactionsPercent/100 * INTERACTIONS_NUMBER)
     nonInteractionSelectionSize = round(nonInteractionsPercent/100 * NONINTERACTIONS_NUMBER)
@@ -108,10 +118,10 @@ def createHeteroNetwork(keys):
 
     data['drug'].x = torch.eye(DRUG_NUMBER, dtype=torch.float)
     data['disease'].x = torch.tensor(np.loadtxt('./data/dis_sim.csv', delimiter=','), dtype=torch.float)
-    data['pathway'].x = torch.eye(PATHWAY_NUMBER)
-    data['enzyme'].x = torch.eye(ENZYME_NUMBER)
-    data['structure'].x = torch.eye(STRUCTURE_NUMBER)
-    data['target'].x = torch.eye(TARGET_NUMBER)
+    data['pathway'].x = torch.eye(PATHWAY_NUMBER, dtype=torch.float)
+    data['enzyme'].x = torch.eye(ENZYME_NUMBER, dtype=torch.float)
+    data['structure'].x = torch.eye(STRUCTURE_NUMBER, dtype=torch.float)
+    data['target'].x = torch.eye(TARGET_NUMBER, dtype=torch.float)
 
     for key in keys:
         data['drug', 'edge', key].edge_index = makePosEdgeIndex(key)
