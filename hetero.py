@@ -139,7 +139,7 @@ def main():
         with torch.no_grad():
             model.encoder(data.x_dict, data.edge_index_dict)
 
-        criterion = torch.nn.BCEWithLogitsLoss()
+        criterion = torch.nn.BCEWithLogitsLoss(pos_weight = torch.tensor([NONINTERACTIONS_NUMBER / INTERACTIONS_NUMBER]))
         for epoch in range(1, EPOCHS):
             loss = train(data, model, optimizer, criterion)
             if epoch % 10 == 0:
