@@ -49,10 +49,10 @@ def splitEdgesBasedOnFolds(interactionsIndicesFolds, k):
     testEdgesIndex = interactionsIndicesFolds[k]
     if(k+1 == FOLDS):
         k = 0
-    superVisionEdgesIndex = interactionsIndicesFolds[k+1]
-    usedIndices = np.concatenate((testEdgesIndex, superVisionEdgesIndex), axis=0)
-    messageEdgesIndex = np.setdiff1d(interactionsIndicesFolds.flatten(), usedIndices, assume_unique=True)
-
+    # superVisionEdgesIndex = interactionsIndicesFolds[k+1]
+    # usedIndices = np.concatenate((testEdgesIndex, superVisionEdgesIndex), axis=0)
+    messageEdgesIndex = np.setdiff1d(interactionsIndicesFolds.flatten(), testEdgesIndex, assume_unique=True)
+    superVisionEdgesIndex = messageEdgesIndex
     return messageEdgesIndex, superVisionEdgesIndex, testEdgesIndex
 
 def splitter(interactionsPercent, nonInteractionsPercent, interactions, nonInteractions, folds=5):

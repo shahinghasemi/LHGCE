@@ -22,7 +22,7 @@ TARGET_NUMBER = 529
 INTERACTIONS_NUMBER = 18416
 NONINTERACTIONS_NUMBER = 142446
 FOLDS = 5
-EPOCHS = 2
+EPOCHS = 500
 
 class GNNEncoder(torch.nn.Module):
     def __init__(self, hidden_channels, out_channels):
@@ -104,6 +104,7 @@ def main():
             edge_index[0].append(drugIndex)
             edge_index[1].append(diseaseIndex)
         edge_index = torch.tensor(edge_index, dtype=torch.long)
+
         data['drug', 'treats', 'disease'].edge_index = edge_index
 
         # Training
