@@ -113,18 +113,23 @@ def makePosEdgeIndex(name, isCSV=False):
     edgeIndex = torch.tensor(edgeIndex, dtype=torch.long)
     return edgeIndex
 
-def createHeteroNetwork(keys):
+def createHeteroNetwork(featureList):
     data = HeteroData()
+    dicNumber = {
+        'drug': DRUG_NUMBER,
+        'disease': DISEASE_NUMBER,
+        'pathway': PATHWAY_NUMBER,
+        'enzyme': ENZYME_NUMBER,
+        'structure': STRUCTURE_NUMBER,
+        'target': TARGET_NUMBER
+    }
 
     data['drug'].x = torch.eye(DRUG_NUMBER, dtype=torch.float)
     data['disease'].x = torch.tensor(np.loadtxt('./data/dis_sim.csv', delimiter=','), dtype=torch.float)
-    data['pathway'].x = torch.eye(PATHWAY_NUMBER, dtype=torch.float)
-    data['enzyme'].x = torch.eye(ENZYME_NUMBER, dtype=torch.float)
-    data['structure'].x = torch.eye(STRUCTURE_NUMBER, dtype=torch.float)
-    data['target'].x = torch.eye(TARGET_NUMBER, dtype=torch.float)
 
-    for key in keys:
-        data['drug', 'edge', key].edge_index = makePosEdgeIndex(key)
+    for featureName in featureList:
+        data[featureName].x = torch.eye(dicNumber[featureName], dtype=torch.float)
+        data['drug', 'edge', featureName].edge_index = makePosEdgeIndex(featureName)
 
     return data
 

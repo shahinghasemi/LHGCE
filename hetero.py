@@ -4,6 +4,7 @@ from torch_geometric.nn import SAGEConv, to_hetero
 import torch
 from torch.nn import Linear
 import torch.nn.functional as F
+import argparse
 from metrics import calculateMetric
 import torch_geometric
 import numpy as np
@@ -12,6 +13,25 @@ torch_geometric.seed_everything(3)
 torch.manual_seed(0)
 np.random.seed(0)
 torch.use_deterministic_algorithms(True)
+
+parser = argparse.ArgumentParser(description='Options')
+parser.add_argument('--feature-list', help='the feature list to include', type=str, nargs="+")
+parser.add_argument('--epoch', help='number of epochs to train in model',type=int, default=20)
+parser.add_argument('--thr-percent', help='the threshold percentage with respect to batch size',type=int, default=5)
+parser.add_argument('--dropout', help='dropout probability for DNN',type=float, default=0.3)
+parser.add_argument('--lr', help='learning rate for DNN',type=float, default=0.01)
+parser.add_argument('--agg', help='aggregation method for DNN input', type=str, default='concatenate')
+
+args = parser.parse_args()
+print(args)
+
+# Setting the global variables
+FEATURE_LIST = args.feature_list
+EPOCHS = args.epoch
+DROPOUT = args.dropout #useless
+THRESHOLD_PERCENT = args.thr_percent
+LEARNING_RATE= args.lr
+AGGREGATION = args.agg #useless
 
 DRUG_NUMBER = 269
 DISEASE_NUMBER = 598
@@ -22,7 +42,6 @@ TARGET_NUMBER = 529
 INTERACTIONS_NUMBER = 18416
 NONINTERACTIONS_NUMBER = 142446
 FOLDS = 5
-EPOCHS = 500
 
 class GNNEncoder(torch.nn.Module):
     def __init__(self, hidden_channels, out_channels):
@@ -79,7 +98,7 @@ def test(test_data, model):
     pred = pred.detach().numpy()
     edge_label = test_data['drug','treats', 'disease'].edge_label.detach().numpy()
 
-    metrics = calculateMetric(edge_label, pred, 3)
+    metrics = calculateMetric(edge_label, pred, THRESHOLD_PERCENT)
     return metrics
 
 
@@ -92,7 +111,7 @@ def main():
 
     interactionsIndicesFolds, nonInteractionsIndicesFolds = prepareData.foldify(selectedInteractions, selectedNonInteractions)
 
-    data = prepareData.createHeteroNetwork(['pathway', 'target', 'structure', 'enzyme'])
+    data = prepareData.createHeteroNetwork(FEATURE_LIST)
 
     metrics = np.zeros(7)
 
@@ -107,7 +126,7 @@ def main():
 
         data['drug', 'treats', 'disease'].edge_index = edge_index
 
-        # Training
+        #------------------Training------------------#
         edge_label_index = [[], []]
         neg_edge_index = [[], []]
         edge_label = []
@@ -130,9 +149,13 @@ def main():
         data = T.ToUndirected()(data)
         data = T.AddSelfLoops()(data)
         data = T.NormalizeFeatures()(data)
+        del data['target', 'drug']
+        del data['enzyme', 'drug']
+        del data['pathway', 'drug']
+        del data['structure', 'drug']
 
         model = Model(data, hidden_channels=32)
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+        optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
         # Due to lazy initialization, we need to run one model step so the number
         # of parameters can be inferred:
@@ -145,7 +168,7 @@ def main():
             if epoch % 10 == 0:
                 print('epoch: ', epoch, 'train loss: ', loss)
         
-        # Testing
+        #------------------Testing------------------#
         edge_label_index = [[], []]
         neg_edge_index = [[], []]
         edge_label = []
