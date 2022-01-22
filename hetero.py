@@ -118,6 +118,9 @@ def main():
     for k in range(FOLDS):
         messageEdgesIndex, superVisionEdgesIndex, testEdgesIndex = prepareData.splitEdgesBasedOnFolds(interactionsIndicesFolds, k)
 
+        testNonEdgesIndex = nonInteractionsIndicesFolds[k]
+        trainNonEdgesIndex = np.setdiff1d(nonInteractionsIndicesFolds.flatten(), testNonEdgesIndex, assume_unique=True)
+
         edge_index = [[], []]
         for drugIndex, diseaseIndex in selectedInteractions[messageEdgesIndex]:
             edge_index[0].append(drugIndex)
@@ -134,7 +137,7 @@ def main():
             edge_label_index[0].append(drugIndex)
             edge_label_index[1].append(diseaseIndex)
             edge_label.append(1)
-        for drugIndex, diseaseIndex in selectedNonInteractions:
+        for drugIndex, diseaseIndex in selectedNonInteractions[trainNonEdgesIndex]:
             neg_edge_index[0].append(drugIndex)
             neg_edge_index[1].append(diseaseIndex)
             edge_label.append(0)
@@ -172,7 +175,7 @@ def main():
             edge_label_index[0].append(drugIndex)
             edge_label_index[1].append(diseaseIndex)
             edge_label.append(1)
-        for drugIndex, diseaseIndex in selectedNonInteractions:
+        for drugIndex, diseaseIndex in selectedNonInteractions[trainNonEdgesIndex]:
             neg_edge_index[0].append(drugIndex)
             neg_edge_index[1].append(diseaseIndex)
             edge_label.append(0)
