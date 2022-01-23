@@ -175,7 +175,7 @@ def main():
             edge_label_index[0].append(drugIndex)
             edge_label_index[1].append(diseaseIndex)
             edge_label.append(1)
-        for drugIndex, diseaseIndex in selectedNonInteractions[trainNonEdgesIndex]:
+        for drugIndex, diseaseIndex in selectedNonInteractions[testNonEdgesIndex]:
             neg_edge_index[0].append(drugIndex)
             neg_edge_index[1].append(diseaseIndex)
             edge_label.append(0)
