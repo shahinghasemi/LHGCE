@@ -7,7 +7,7 @@
 | undirected graph | interactions that != interactions[k] | interactions that != interactions[k] (the same as message edges) | interactions[k] | [e, p, t, s] | 5 | adam | batch gradient | 2000 | 0 | 0.01 | 97.8% | 89.8% | 53.4% | 52.1% | 48.7% | 99.1% | 59.2% |
 | undirected graph | interactions that != interactions[k] | interactions that != interactions[k] (the same as message edges) | interactions[k] | [e, p, t, s] | 5 | adam | batch gradient | 2500 | 0 | 0.01 | 98% | 89.8% | 55.4% | 54.2% | 49.3% | 99.2% | 63.5% |
 | undirected graph | interactions that != interactions[k] | interactions that != interactions[k] (the same as message edges) | interactions[k] | [e, p, t, s] | 5 | adam | batch gradient | 3000 | 0 | 0.01 | 98% | 90% | 56.8% | 55.6% | 51.4% | 99.2% | 63.5% 
-| undirected graph, non-interactions are splited in 1/k and k-1/k | interactions that != interactions[k] | interactions that != interactions[k] (the same as message edges) | interactions[k] | [e, p, t, s] | 5 | adam | batch gradient | 3000 | 0 | 0.01 
+| undirected graph, non-interactions are splited in 1/k and k-1/k | interactions that != interactions[k] | interactions that != interactions[k] (the same as message edges) | interactions[k] | [e, p, t, s] | 5 | adam | batch gradient | 3000 | 0 | 0.01 | 91.5% | 88.9% | 62.8% | 61.3% | 62.4% | 95.2% | 63.2% | 
 
-
+[0.6132072  0.88945049 0.62845767 0.91544821 0.62497964 0.95299939 0.63214005]
 

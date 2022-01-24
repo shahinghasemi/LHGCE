@@ -55,7 +55,7 @@ def splitEdgesBasedOnFolds(interactionsIndicesFolds, k):
     superVisionEdgesIndex = messageEdgesIndex
     return messageEdgesIndex, superVisionEdgesIndex, testEdgesIndex
 
-def splitter(interactionsPercent, nonInteractionsPercent, interactions, nonInteractions, folds=5):
+def splitter(sameSize, interactionsPercent, nonInteractionsPercent, interactions, nonInteractions, folds=5):
     interactionSelectionSize = round(interactionsPercent/100 * INTERACTIONS_NUMBER)
     nonInteractionSelectionSize = round(nonInteractionsPercent/100 * NONINTERACTIONS_NUMBER)
 
@@ -65,11 +65,14 @@ def splitter(interactionsPercent, nonInteractionsPercent, interactions, nonInter
 
     # choose randomly
     interactionsIndices = np.random.choice(INTERACTIONS_NUMBER, interactionSelectionSize)
-    nonInteractionsIndices = np.random.choice(NONINTERACTIONS_NUMBER, nonInteractionSelectionSize)
+    if sameSize:
+        nonInteractionsIndices = np.random.choice(NONINTERACTIONS_NUMBER, interactionSelectionSize)
+    else:
+        nonInteractionsIndices = np.random.choice(NONINTERACTIONS_NUMBER, nonInteractionSelectionSize)
 
-    selectedNonInteractions = nonInteractions[nonInteractionsIndices]
-    selectedInteractions = interactions[interactionsIndices]
-    return selectedInteractions, selectedNonInteractions
+    selectedNonInteractionsPairs = nonInteractions[nonInteractionsIndices]
+    selectedInteractionsPairs = interactions[interactionsIndices]
+    return selectedInteractionsPairs, selectedNonInteractionsPairs
 
 def foldify(totalInteractions, totalNonInteractions):
     sizeOfInteractions = totalInteractions.shape[0]

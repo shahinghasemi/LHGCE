@@ -107,8 +107,7 @@ def main():
     totalInteractions = np.array(np.mat(np.where(drugDisease == 1)).T) #(18416, 2)
     totalNonInteractions = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
 
-    selectedInteractions, selectedNonInteractions = prepareData.splitter(100, 100, totalInteractions, totalNonInteractions)
-
+    selectedInteractions, selectedNonInteractions = prepareData.splitter(True, 100, 100, totalInteractions, totalNonInteractions)
     interactionsIndicesFolds, nonInteractionsIndicesFolds = prepareData.foldify(selectedInteractions, selectedNonInteractions)
 
     data = prepareData.createHeteroNetwork(FEATURE_LIST)
