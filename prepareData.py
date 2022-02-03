@@ -2,9 +2,7 @@
 import numpy as np
 import scipy.io as sio
 from sklearn.decomposition import PCA
-# import matplotlib.pyplot as plt
 import torch
-from GCN import GCNEmbedding
 from torch_geometric.data import HeteroData
 
 DRUG_NUMBER = 269
