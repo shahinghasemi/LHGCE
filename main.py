@@ -22,7 +22,7 @@ parser.add_argument('--lr', help='learning rate for DNN',type=float, default=0.0
 parser.add_argument('--agg', help='aggregation method for Linear layer to predict', type=str, default='concatenate')
 parser.add_argument('--l', help='number of layers for graph convolutional encoder', type=int, default=2)
 parser.add_argument('--n', help='number of neurons for each GCE layer', type=int, default=32)
-parser.add_argument('--same', help='whether the same number of negatives should be selected as positives(interations)', type=bool, default=False)
+parser.add_argument('--same', help='whether the same number of negatives should be selected as positives(interations)', type=lambda x: (str(x).lower() == 'true'), default=False)
 
 args = parser.parse_args()
 print(args)
