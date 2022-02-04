@@ -22,6 +22,7 @@ parser.add_argument('--lr', help='learning rate for DNN',type=float, default=0.0
 parser.add_argument('--agg', help='aggregation method for Linear layer to predict', type=str, default='concatenate')
 parser.add_argument('--l', help='number of layers for graph convolutional encoder', type=int, default=2)
 parser.add_argument('--n', help='number of neurons for each GCE layer', type=int, default=32)
+parser.add_argument('--same', help='whether the same number of negatives should be selected as positives(interations)', type=bool, default=False)
 
 args = parser.parse_args()
 print(args)
@@ -35,6 +36,7 @@ LEARNING_RATE= args.lr
 AGGREGATOR = args.agg #useless
 LAYERS = args.l
 NEURONS = args.n
+SAME_NEGATIVE = args.same
 
 # Setting the static global variables
 DRUG_NUMBER = 269
@@ -52,7 +54,7 @@ def main():
     totalInteractions = np.array(np.mat(np.where(drugDisease == 1)).T) #(18416, 2)
     totalNonInteractions = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
 
-    selectedInteractions, selectedNonInteractions = splitter(True, 100, 100, totalInteractions, totalNonInteractions)
+    selectedInteractions, selectedNonInteractions = splitter(SAME_NEGATIVE, 100, 100, totalInteractions, totalNonInteractions)
     interactionsIndicesFolds, nonInteractionsIndicesFolds = foldify(selectedInteractions, selectedNonInteractions)
 
     data = createHeteroNetwork(FEATURE_LIST)

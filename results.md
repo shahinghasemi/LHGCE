@@ -10,4 +10,4 @@
 | undirected graph, non-interactions are splited in 1/k and k-1/k | interactions that != interactions[k] | interactions that != interactions[k] (the same as message edges) | interactions[k] | [e, p, t, s] | 5 | adam | batch gradient | 3000 | 0 | 0.01 | 91.5% | 88.9% | 62.8% | 61.3% | 62.4% | 95.2% | 63.2% | 
 | undirected graph, number non-interactions = Ninteraction then are splited in 1/k and k-1/k | interactions that != interactions[k] | interactions that != interactions[k] (the same as message edges) | interactions[k] | [e, p, t, s] | 5 | adam | batch gradient | 3000 | 0 | 0.01 | 74.1% | 77.3% | 78.3% | 80.5% | 88.5% | 59.7% | 71.8%
 
-[0.80515212 0.77361586 0.78301369 0.74135215 0.88531088 0.59739342 0.71841302]
+[0.82714053 0.90245458 0.78716865 0.90767491 0.8093945  0.92733098 0.82461995]
