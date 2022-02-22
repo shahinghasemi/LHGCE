@@ -5,6 +5,7 @@ import argparse
 import torch_geometric
 import numpy as np
 from model import Model, test, train
+from dataloader import dataloader
 
 # Make everything reproducible
 torch_geometric.seed_everything(3)
@@ -14,7 +15,7 @@ torch.use_deterministic_algorithms(True)
 
 # Parsing CLI args.
 parser = argparse.ArgumentParser(description='Options')
-parser.add_argument('--feature-list', help='the feature list to include', type=str, nargs="+")
+parser.add_argument('--dataset', help='dataset to use', type=str, default='lagcn')
 parser.add_argument('--epochs', help='number of epochs to train in model',type=int, default=20)
 parser.add_argument('--thr-percent', help='the threshold percentage with respect to batch size',type=int, default=5)
 parser.add_argument('--dropout', help='dropout probability for DNN',type=float, default=0.3)
@@ -28,36 +29,32 @@ args = parser.parse_args()
 print(args)
 
 # Setting the dynamic global variables
-FEATURE_LIST = args.feature_list
+DATASET = args.dataset
 EPOCHS = args.epochs
 DROPOUT = args.dropout #useless
 THRESHOLD_PERCENT = args.thr_percent
 LEARNING_RATE= args.lr
-AGGREGATOR = args.agg #useless
+AGGREGATOR = args.agg
 LAYERS = args.l
 NEURONS = args.n
 SAME_NEGATIVE = args.same
 
 # Setting the static global variables
-DRUG_NUMBER = 269
-DISEASE_NUMBER = 598
-ENZYME_NUMBER = 108
-STRUCTURE_NUMBER = 881
-PATHWAY_NUMBER = 258
-TARGET_NUMBER = 529
-INTERACTIONS_NUMBER = 18416
-NONINTERACTIONS_NUMBER = 142446
+# DRUG_NUMBER = 269
+# DISEASE_NUMBER = 598
+# ENZYME_NUMBER = 108
+# STRUCTURE_NUMBER = 881
+# PATHWAY_NUMBER = 258
+# TARGET_NUMBER = 529
+# INTERACTIONS_NUMBER = 18416
+# NONINTERACTIONS_NUMBER = 142446
 FOLDS = 5
 
 def main():
-    drugDisease = np.loadtxt('./data/drug_disease.csv', delimiter=',')
-    totalInteractions = np.array(np.mat(np.where(drugDisease == 1)).T) #(18416, 2)
-    totalNonInteractions = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
+    data, totalInteractions, totalNonInteractions = dataloader(DATASET)
 
-    selectedInteractions, selectedNonInteractions = splitter(SAME_NEGATIVE, 100, 100, totalInteractions, totalNonInteractions)
+    selectedInteractions, selectedNonInteractions = splitter(DATASET, SAME_NEGATIVE, totalInteractions, totalNonInteractions)
     interactionsIndicesFolds, nonInteractionsIndicesFolds = foldify(selectedInteractions, selectedNonInteractions)
-
-    data = createHeteroNetwork(FEATURE_LIST)
 
     metrics = np.zeros(7)
 
@@ -83,7 +80,7 @@ def main():
             edge_label_index[0].append(drugIndex)
             edge_label_index[1].append(diseaseIndex)
             edge_label.append(1)
-        for drugIndex, diseaseIndex in selectedNonInteractions:
+        for drugIndex, diseaseIndex in selectedNonInteractions[trainNonEdgesIndex]:
             neg_edge_index[0].append(drugIndex)
             neg_edge_index[1].append(diseaseIndex)
             edge_label.append(0)
@@ -94,7 +91,6 @@ def main():
         data['drug', 'treats', 'disease'].edge_label_index = torch.cat([edge_label_index, neg_edge_index],dim=-1)
         data['drug', 'treats', 'disease'].edge_label = edge_label
 
-        # TODO: maybe undirected reduce the performance
         data = T.ToUndirected()(data)
         data = T.AddSelfLoops()(data)
         data = T.NormalizeFeatures()(data)
@@ -121,7 +117,7 @@ def main():
             edge_label_index[0].append(drugIndex)
             edge_label_index[1].append(diseaseIndex)
             edge_label.append(1)
-        for drugIndex, diseaseIndex in selectedNonInteractions:
+        for drugIndex, diseaseIndex in selectedNonInteractions[testNonEdgesIndex]:
             neg_edge_index[0].append(drugIndex)
             neg_edge_index[1].append(diseaseIndex)
             edge_label.append(0)
@@ -140,3 +136,17 @@ def main():
 
 metrics = main()
 print('results: ', metrics / FOLDS)
+
+# def main():
+#     drugDisease = np.loadtxt('./data/deepDR/drug_disease.txt', delimiter='\t')
+#     drugDrug = np.loadtxt('./data/deepDR/drug_drug.txt', delimiter='\t')
+#     drugProtein = np.loadtxt('./data/deepDR/drug_protein.txt', delimiter='\t')
+#     drugSide = np.loadtxt('./data/deepDR/drug_sideeffect.txt', delimiter='\t')
+#     totalInteractions = np.array(np.mat(np.where(drugDisease == 0)).T) #(18416, 2)
+
+#     print('totalInteractions: ', totalInteractions.shape)
+#     print('drugDisease: ', drugDisease.shape)
+#     print('drugDrug: ', drugDrug.shape)
+#     print('drugProtein: ', drugProtein.shape)
+#     print('drugSide: ', drugSide.shape)
+# main()

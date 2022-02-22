@@ -5,17 +5,7 @@ from sklearn.decomposition import PCA
 import torch
 from torch_geometric.data import HeteroData
 
-DRUG_NUMBER = 269
-DISEASE_NUMBER = 598
-ENZYME_NUMBER = 108
-STRUCTURE_NUMBER = 881
-PATHWAY_NUMBER = 258
-TARGET_NUMBER = 529
-INTERACTIONS_NUMBER = 18416
-NONINTERACTIONS_NUMBER = 142446
 FOLDS = 5
-
-
 # def Cosine(matrix)
 def Jaccard(matrix):
     matrix = np.mat(matrix)
@@ -24,7 +14,7 @@ def Jaccard(matrix):
     return np.array(numerator / denominator)
 
 def readFromMat():
-    data = sio.loadmat('./data/SCMFDD_Dataset.mat')
+    data = sio.loadmat('./data/lagcn/SCMFDD_Dataset.mat')
     print('data.keys(): ', data.keys())
 
     np.savetxt('./drugDrug_feature_matrix.txt', np.array(data['drug_drug_interaction_feature_matrix']))
@@ -45,21 +35,27 @@ def plotAndSave(X, Y, labels, feature):
 
 def splitEdgesBasedOnFolds(interactionsIndicesFolds, k):
     testEdgesIndex = interactionsIndicesFolds[k]
-    if(k+1 == FOLDS):
-        k = 0
+    # if(k+1 == FOLDS):
+    #     k = 0
     # superVisionEdgesIndex = interactionsIndicesFolds[k+1]
     # usedIndices = np.concatenate((testEdgesIndex, superVisionEdgesIndex), axis=0)
     messageEdgesIndex = np.setdiff1d(interactionsIndicesFolds.flatten(), testEdgesIndex, assume_unique=True)
     superVisionEdgesIndex = messageEdgesIndex
     return messageEdgesIndex, superVisionEdgesIndex, testEdgesIndex
 
-def splitter(sameSize, interactionsPercent, nonInteractionsPercent, interactions, nonInteractions, folds=5):
-    interactionSelectionSize = round(interactionsPercent/100 * INTERACTIONS_NUMBER)
-    nonInteractionSelectionSize = round(nonInteractionsPercent/100 * NONINTERACTIONS_NUMBER)
+def splitter(dataset, sameSize, interactions, nonInteractions):
+    # interactionSelectionSize = round(interactionsPercent/100 * INTERACTIONS_NUMBER)
+    # nonInteractionSelectionSize = round(nonInteractionsPercent/100 * NONINTERACTIONS_NUMBER)
 
+    if dataset == 'lagcn':
+        INTERACTIONS_NUMBER = 18416
+        NONINTERACTIONS_NUMBER = 142446
+    elif dataset == 'deepDR':
+        INTERACTIONS_NUMBER = 6677
+        NONINTERACTIONS_NUMBER = 1860174      
     # remove some samples to be dividable by the folds
-    interactionSelectionSize = interactionSelectionSize - (interactionSelectionSize % folds)
-    nonInteractionSelectionSize = nonInteractionSelectionSize - (nonInteractionSelectionSize % folds)
+    interactionSelectionSize = INTERACTIONS_NUMBER - (INTERACTIONS_NUMBER % FOLDS)
+    nonInteractionSelectionSize = NONINTERACTIONS_NUMBER - (NONINTERACTIONS_NUMBER % FOLDS)
 
     # choose randomly
     interactionsIndices = np.random.choice(INTERACTIONS_NUMBER, interactionSelectionSize)
@@ -84,26 +80,9 @@ def foldify(totalInteractions, totalNonInteractions):
 
     return interactionsIndicesFolds, nonInteractionsIndicesFolds
 
-def makeNegEdgeIndex(name, isCSV=False):
-    if isCSV:
-        matrix = np.loadtxt('./data/drug_' + name + '.csv', delimiter=',')
-    else:
-        matrix = np.loadtxt('./data/drug_' + name + '.txt')
-    result = np.where(matrix == 0)
-    edgeIndex = [[], []]
-    for index in result[0]:
-        edgeIndex[0].append(index)
-    for index in result[1]:
-        edgeIndex[1].append(index)
+def makePosEdgeIndex(dataset, name, delimiter=','):
+    matrix = np.loadtxt('./data/' + dataset + '/' + name, delimiter=delimiter)
 
-    edgeIndex = torch.tensor(edgeIndex, dtype=torch.long)
-    return edgeIndex
-
-def makePosEdgeIndex(name, isCSV=False):
-    if isCSV:
-        matrix = np.loadtxt('./data/drug_' + name + '.csv', delimiter=',')
-    else:
-        matrix = np.loadtxt('./data/drug_' + name + '.txt')
     result = np.where(matrix == 1)
     edgeIndex = [[], []]
     for index in result[0]:
@@ -114,19 +93,19 @@ def makePosEdgeIndex(name, isCSV=False):
     edgeIndex = torch.tensor(edgeIndex, dtype=torch.long)
     return edgeIndex
 
-def createHeteroNetwork(featureList):
+def createHeteroNetwork(dicNumber, featureName):
     data = HeteroData()
-    dicNumber = {
-        'drug': DRUG_NUMBER,
-        'disease': DISEASE_NUMBER,
-        'pathway': PATHWAY_NUMBER,
-        'enzyme': ENZYME_NUMBER,
-        'structure': STRUCTURE_NUMBER,
-        'target': TARGET_NUMBER
-    }
+    # dicNumber = {
+    #     'drug': DRUG_NUMBER,
+    #     'disease': DISEASE_NUMBER,
+    #     'pathway': PATHWAY_NUMBER,
+    #     'enzyme': ENZYME_NUMBER,
+    #     'structure': STRUCTURE_NUMBER,
+    #     'target': TARGET_NUMBER
+    # }
 
     data['drug'].x = torch.eye(DRUG_NUMBER, dtype=torch.float)
-    data['disease'].x = torch.tensor(np.loadtxt('./data/dis_sim.csv', delimiter=','), dtype=torch.float)
+    data['disease'].x = torch.tensor(np.loadtxt('./data/lagcn/dis_sim.csv', delimiter=','), dtype=torch.float)
 
     for featureName in featureList:
         data[featureName].x = torch.eye(dicNumber[featureName], dtype=torch.float)
@@ -139,7 +118,7 @@ def prepareDrugData(featureList, embeddingMethod):
     finalDic = {}
 
     for feature in featureList:
-        matrix = np.loadtxt('./data/'+ feature+ '_feature_matrix.txt')
+        matrix = np.loadtxt('./data/lagcn/'+ feature+ '_feature_matrix.txt')
         featureMatrixDic[feature] = matrix
     
     if embeddingMethod == 'AE' or embeddingMethod == 'matrix':
@@ -163,8 +142,8 @@ def prepareDrugData(featureList, embeddingMethod):
             finalDic[feature] = transformed
 
     elif embeddingMethod == 'diseaseGCN':
-        diseaseSim = np.loadtxt('./data/dis_sim.csv', delimiter=',')
-        drugDisease = np.loadtxt('./data/drug_dis.csv', delimiter=',')
+        diseaseSim = np.loadtxt('./data/lagcn/dis_sim.csv', delimiter=',')
+        drugDisease = np.loadtxt('./data/lagcn/drug_dis.csv', delimiter=',')
         drugDisease = np.transpose(drugDisease)
         embedding = GCNEmbedding(diseaseSim, drugDisease, 300, 0.0001)
         np.savetxt('./diseaseGCN_feature_matrix.txt', np.array(embedding))
