@@ -47,7 +47,7 @@ def splitter(dataset, sameSize, interactions, nonInteractions):
     # interactionSelectionSize = round(interactionsPercent/100 * INTERACTIONS_NUMBER)
     # nonInteractionSelectionSize = round(nonInteractionsPercent/100 * NONINTERACTIONS_NUMBER)
 
-    if dataset == 'lagcn':
+    if dataset == 'LAGCN':
         INTERACTIONS_NUMBER = 18416
         NONINTERACTIONS_NUMBER = 142446
     elif dataset == 'deepDR':
@@ -80,15 +80,15 @@ def foldify(totalInteractions, totalNonInteractions):
 
     return interactionsIndicesFolds, nonInteractionsIndicesFolds
 
-def makePosEdgeIndex(dataset, name, delimiter=','):
+def makePosEdgeIndex(dataset, name, delimiter=',', percent = 100):
     matrix = np.loadtxt('./data/' + dataset + '/' + name, delimiter=delimiter)
 
     result = np.where(matrix == 1)
     edgeIndex = [[], []]
-    for index in result[0]:
-        edgeIndex[0].append(index)
-    for index in result[1]:
-        edgeIndex[1].append(index)
+    choseIndex = np.random.choice(result[0].shape[0], int(result[0].shape[0] * percent / 100))
+    for index in choseIndex:
+        edgeIndex[0].append(result[0][index]) 
+        edgeIndex[1].append(result[1][index])
 
     edgeIndex = torch.tensor(edgeIndex, dtype=torch.long)
     return edgeIndex
