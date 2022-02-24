@@ -2,11 +2,37 @@ from prepareData import makePosEdgeIndex
 from torch_geometric.data import HeteroData
 import numpy as np 
 import torch
+import pandas as pd
 
 def dataloader(dataset):
     print('dataset: ', dataset)
     data = HeteroData()
-    if dataset == 'deepDR':
+    if dataset == 'LRSSL':
+        numbers = {
+            'drug': 763,
+            'disease': 681,
+            'go': 4447,
+            'target': 1426,
+            'structure': 623,
+            'interactions': 3051,
+            'nonInteractions': 516552,
+        }
+
+        drugDisease = pd.read_csv('./data/' + dataset + '/drug_dis_mat.txt', sep='\t', header=None).drop(columns=0, index=0).to_numpy(dtype=np.integer)
+        totalInteractions = np.array(np.mat(np.where(drugDisease == 1)).T) #(3051, 2)
+        totalNonInteractions = np.array(np.mat(np.where(drugDisease == 0)).T) #(516552, 2)
+        
+        data['drug'].x = torch.eye(numbers.get('drug'), dtype=torch.float)
+        data['disease'].x = torch.tensor(pd.read_csv('./data/' + dataset + '/disease_similarity.txt', sep='\t', header=None).drop(columns=0, index=0).to_numpy(dtype=np.float64), dtype=torch.float)        
+        data['go'].x = torch.eye(numbers.get('go'), dtype=torch.float)
+        data['target'].x = torch.eye(numbers.get('target'), dtype=torch.float)
+        data['structure'].x = torch.eye(numbers.get('structure'), dtype=torch.float)
+      
+        data['drug', 'edge', 'go'].edge_index = makePosEdgeIndex(dataset, 'drug_target_go_mat.txt', '\t', dataframe=True)
+        data['drug', 'edge', 'target'].edge_index = makePosEdgeIndex(dataset, 'drug_target_domain_mat.txt', '\t', dataframe=True)
+        data['drug', 'edge', 'structure'].edge_index = makePosEdgeIndex(dataset, 'drug_pubchem_mat.txt', '\t', dataframe=True)
+
+    elif dataset == 'deepDR':
         numbers = {
             'drug': 1519,
             'disease': 1229,
@@ -19,8 +45,7 @@ def dataloader(dataset):
         totalInteractions = np.array(np.mat(np.where(drugDisease == 1)).T) #(6677, 2)
         totalNonInteractions = np.array(np.mat(np.where(drugDisease == 0)).T) #(1860174, 2)
 
-        drugDrug = np.loadtxt('./data/' + 'deepDR' + '/drug_drug.txt', delimiter='\t')
-        data['drug'].x = torch.tensor(drugDrug, dtype=torch.float)
+        data['drug'].x = torch.tensor(np.loadtxt('./data/' + 'deepDR' + '/drug_drug.txt', delimiter='\t'), dtype=torch.float)
         data['disease'].x = torch.eye(numbers.get('disease'), dtype=torch.float)
         data['protein'].x = torch.eye(numbers.get('protein'), dtype=torch.float)
         data['sideEffect'].x = torch.eye(numbers.get('sideEffect'), dtype=torch.float)

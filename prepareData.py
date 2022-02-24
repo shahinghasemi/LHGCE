@@ -4,6 +4,7 @@ import scipy.io as sio
 from sklearn.decomposition import PCA
 import torch
 from torch_geometric.data import HeteroData
+import pandas as pd
 
 FOLDS = 5
 # def Cosine(matrix)
@@ -50,6 +51,9 @@ def splitter(dataset, sameSize, interactions, nonInteractions):
     if dataset == 'LAGCN':
         INTERACTIONS_NUMBER = 18416
         NONINTERACTIONS_NUMBER = 142446
+    elif dataset == 'LRSSL':
+        INTERACTIONS_NUMBER = 3051
+        NONINTERACTIONS_NUMBER = 516552
     elif dataset == 'deepDR':
         INTERACTIONS_NUMBER = 6677
         NONINTERACTIONS_NUMBER = 1860174      
@@ -80,8 +84,11 @@ def foldify(totalInteractions, totalNonInteractions):
 
     return interactionsIndicesFolds, nonInteractionsIndicesFolds
 
-def makePosEdgeIndex(dataset, name, delimiter=',', percent = 100):
-    matrix = np.loadtxt('./data/' + dataset + '/' + name, delimiter=delimiter)
+def makePosEdgeIndex(dataset, name, delimiter=',', percent = 100, dataframe=False):
+    if dataframe:
+        matrix = pd.read_csv('./data/' + dataset + '/' + name, delimiter=delimiter, header=None).drop(columns=0, index=0).to_numpy(dtype=np.integer)
+    else:
+        matrix = np.loadtxt('./data/' + dataset + '/' + name, delimiter=delimiter)
 
     result = np.where(matrix == 1)
     edgeIndex = [[], []]
