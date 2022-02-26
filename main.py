@@ -24,6 +24,7 @@ parser.add_argument('--agg', help='aggregation method for Linear layer to predic
 parser.add_argument('--l', help='number of layers for graph convolutional encoder', type=int, default=2)
 parser.add_argument('--n', help='number of neurons for each GCE layer', type=int, default=32)
 parser.add_argument('--same', help='whether the same number of negatives should be selected as positives(interations)', type=lambda x: (str(x).lower() == 'true'), default=False)
+parser.add_argument('--negative-split', help='how negatives should be involved in training and testing phase?', type=str, default='all')
 
 args = parser.parse_args()
 print(args)
@@ -38,16 +39,8 @@ AGGREGATOR = args.agg
 LAYERS = args.l
 NEURONS = args.n
 SAME_NEGATIVE = args.same
-
+NEGATIVE_SPLIT = args.negative_split
 # Setting the static global variables
-# DRUG_NUMBER = 269
-# DISEASE_NUMBER = 598
-# ENZYME_NUMBER = 108
-# STRUCTURE_NUMBER = 881
-# PATHWAY_NUMBER = 258
-# TARGET_NUMBER = 529
-# INTERACTIONS_NUMBER = 18416
-# NONINTERACTIONS_NUMBER = 142446
 FOLDS = 5
 
 def main():
@@ -80,10 +73,16 @@ def main():
             edge_label_index[0].append(drugIndex)
             edge_label_index[1].append(diseaseIndex)
             edge_label.append(1)
-        for drugIndex, diseaseIndex in selectedNonInteractions[trainNonEdgesIndex]:
-            neg_edge_index[0].append(drugIndex)
-            neg_edge_index[1].append(diseaseIndex)
-            edge_label.append(0)
+        if NEGATIVE_SPLIT == 'fold':
+            for drugIndex, diseaseIndex in selectedNonInteractions[trainNonEdgesIndex]:
+                neg_edge_index[0].append(drugIndex)
+                neg_edge_index[1].append(diseaseIndex)
+                edge_label.append(0)
+        elif NEGATIVE_SPLIT == 'all':
+            for drugIndex, diseaseIndex in selectedNonInteractions:
+                neg_edge_index[0].append(drugIndex)
+                neg_edge_index[1].append(diseaseIndex)
+                edge_label.append(0)
         edge_label_index = torch.tensor(edge_label_index, dtype=torch.long)
         neg_edge_index = torch.tensor(neg_edge_index, dtype=torch.long)
         edge_label = torch.tensor(edge_label, dtype=torch.float)
@@ -117,10 +116,16 @@ def main():
             edge_label_index[0].append(drugIndex)
             edge_label_index[1].append(diseaseIndex)
             edge_label.append(1)
-        for drugIndex, diseaseIndex in selectedNonInteractions[testNonEdgesIndex]:
-            neg_edge_index[0].append(drugIndex)
-            neg_edge_index[1].append(diseaseIndex)
-            edge_label.append(0)
+        if NEGATIVE_SPLIT == 'fold':
+            for drugIndex, diseaseIndex in selectedNonInteractions[testNonEdgesIndex]:
+                neg_edge_index[0].append(drugIndex)
+                neg_edge_index[1].append(diseaseIndex)
+                edge_label.append(0)
+        elif NEGATIVE_SPLIT == 'all':
+            for drugIndex, diseaseIndex in selectedNonInteractions:
+                neg_edge_index[0].append(drugIndex)
+                neg_edge_index[1].append(diseaseIndex)
+                edge_label.append(0)
         edge_label_index = torch.tensor(edge_label_index, dtype=torch.long)
         neg_edge_index = torch.tensor(neg_edge_index, dtype=torch.long)
         edge_label = torch.tensor(edge_label, dtype=torch.float)
@@ -136,17 +141,3 @@ def main():
 
 metrics = main()
 print('results: ', metrics / FOLDS)
-
-# def main():
-#     drugDisease = np.loadtxt('./data/deepDR/drug_disease.txt', delimiter='\t')
-#     drugDrug = np.loadtxt('./data/deepDR/drug_drug.txt', delimiter='\t')
-#     drugProtein = np.loadtxt('./data/deepDR/drug_protein.txt', delimiter='\t')
-#     drugSide = np.loadtxt('./data/deepDR/drug_sideeffect.txt', delimiter='\t')
-#     totalInteractions = np.array(np.mat(np.where(drugDisease == 0)).T) #(18416, 2)
-
-#     print('totalInteractions: ', totalInteractions.shape)
-#     print('drugDisease: ', drugDisease.shape)
-#     print('drugDrug: ', drugDrug.shape)
-#     print('drugProtein: ', drugProtein.shape)
-#     print('drugSide: ', drugSide.shape)
-# main()
