@@ -10,4 +10,5 @@
 | undirected graph, non-interactions are splited in 1/k and k-1/k | interactions that != interactions[k] | interactions that != interactions[k] (the same as message edges) | interactions[k] | [e, p, t, s] | 5 | adam | batch gradient | 3000 | 0 | 0.01 | 91.5% | 88.9% | 62.8% | 61.3% | 62.4% | 95.2% | 63.2% | 
 | undirected graph, number non-interactions = Ninteraction then are splited in 1/k and k-1/k | interactions that != interactions[k] | interactions that != interactions[k] (the same as message edges) | interactions[k] | [e, p, t, s] | 5 | adam | batch gradient | 3000 | 0 | 0.01 | 74.1% | 77.3% | 78.3% | 80.5% | 88.5% | 59.7% | 71.8%
 
-[0.87641131 0.87437338 0.83127567 0.83565544 0.80958803 0.86172284 0.85424073]: deepDR without sideEffect and --epochs 1000 --thr-percent 3 --same True --dataset deepDR
+
+[0.5616272  0.90291903 0.57505843 0.98082092 0.51517785 0.9928604 0.65222069] for LRSSL

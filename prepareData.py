@@ -53,10 +53,10 @@ def splitter(dataset, sameSize, interactions, nonInteractions):
         NONINTERACTIONS_NUMBER = 142446
     elif dataset == 'LRSSL':
         INTERACTIONS_NUMBER = 3051
-        NONINTERACTIONS_NUMBER = 516552
-    elif dataset == 'deepDR':
-        INTERACTIONS_NUMBER = 6677
-        NONINTERACTIONS_NUMBER = 1860174      
+        NONINTERACTIONS_NUMBER = 516552  
+    elif dataset == 'MGATRx':
+        INTERACTIONS_NUMBER = 8957
+        NONINTERACTIONS_NUMBER = 11846707     
     # remove some samples to be dividable by the folds
     interactionSelectionSize = INTERACTIONS_NUMBER - (INTERACTIONS_NUMBER % FOLDS)
     nonInteractionSelectionSize = NONINTERACTIONS_NUMBER - (NONINTERACTIONS_NUMBER % FOLDS)
