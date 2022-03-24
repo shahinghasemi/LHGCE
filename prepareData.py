@@ -44,19 +44,7 @@ def splitEdgesBasedOnFolds(interactionsIndicesFolds, k):
     superVisionEdgesIndex = messageEdgesIndex
     return messageEdgesIndex, superVisionEdgesIndex, testEdgesIndex
 
-def splitter(dataset, sameSize, interactions, nonInteractions):
-    # interactionSelectionSize = round(interactionsPercent/100 * INTERACTIONS_NUMBER)
-    # nonInteractionSelectionSize = round(nonInteractionsPercent/100 * NONINTERACTIONS_NUMBER)
-
-    if dataset == 'LAGCN':
-        INTERACTIONS_NUMBER = 18416
-        NONINTERACTIONS_NUMBER = 142446
-    elif dataset == 'LRSSL':
-        INTERACTIONS_NUMBER = 3051
-        NONINTERACTIONS_NUMBER = 516552  
-    elif dataset == 'MGATRx':
-        INTERACTIONS_NUMBER = 8957
-        NONINTERACTIONS_NUMBER = 11846707     
+def splitter(sameSize, interactions, nonInteractions, INTERACTIONS_NUMBER, NONINTERACTIONS_NUMBER):
     # remove some samples to be dividable by the folds
     interactionSelectionSize = INTERACTIONS_NUMBER - (INTERACTIONS_NUMBER % FOLDS)
     nonInteractionSelectionSize = NONINTERACTIONS_NUMBER - (NONINTERACTIONS_NUMBER % FOLDS)

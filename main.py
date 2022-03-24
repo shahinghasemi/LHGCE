@@ -44,9 +44,9 @@ NEGATIVE_SPLIT = args.negative_split
 FOLDS = 5
 
 def main():
-    data, totalInteractions, totalNonInteractions = dataloader(DATASET)
+    data, totalInteractions, totalNonInteractions, INTERACTIONS_NUMBER, NONINTERACTIONS_NUMBER = dataloader(DATASET)
 
-    selectedInteractions, selectedNonInteractions = splitter(DATASET, SAME_NEGATIVE, totalInteractions, totalNonInteractions)
+    selectedInteractions, selectedNonInteractions = splitter(SAME_NEGATIVE, totalInteractions, totalNonInteractions, INTERACTIONS_NUMBER, NONINTERACTIONS_NUMBER)
     interactionsIndicesFolds, nonInteractionsIndicesFolds = foldify(selectedInteractions, selectedNonInteractions)
 
     metrics = np.zeros(7)
@@ -96,6 +96,8 @@ def main():
 
         model = Model(data, neurons=32, layers=LAYERS, aggregator=AGGREGATOR)
         optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
+        # for x, in model.parameters():
+        #     print('x: ', x)
 
         # Due to lazy initialization, we need to run one model step so the number
         # of parameters can be inferred:

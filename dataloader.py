@@ -32,7 +32,7 @@ def dataloader(dataset):
         data['drug', 'edge', 'target'].edge_index = makePosEdgeIndex(dataset, 'drug_target_domain_mat.txt', '\t', dataframe=True)
         data['drug', 'edge', 'structure'].edge_index = makePosEdgeIndex(dataset, 'drug_pubchem_mat.txt', '\t', dataframe=True)
 
-    elif dataset == 'LAGCN':
+    elif dataset == 'LAGCN' or dataset == 'LAGCN-therapeutic':
         numbers = {
             'drug': 269,
             'disease': 598,
@@ -40,13 +40,18 @@ def dataloader(dataset):
             'enzyme': 108,
             'target': 529,
             'structure': 881,
-            'interactions': 18416,
-            'nonInteractions': 142446,
+            'interactions': 18416 if dataset == 'LAGCN' else 6244,
+            'nonInteractions': 142446 if dataset == 'LAGCN' else 154618,
         }
 
-        drugDisease = np.loadtxt('./data/' + 'LAGCN' + '/drug_disease.csv', delimiter=',')
-        totalInteractions = np.array(np.mat(np.where(drugDisease == 1)).T) #(18416, 2)
-        totalNonInteractions = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
+        if dataset == 'LAGCN':
+            drugDisease = np.loadtxt('./data/' + 'LAGCN' + '/drug_disease.csv', delimiter=',')
+            totalInteractions = np.array(np.mat(np.where(drugDisease == 1)).T) #(18416, 2)
+            totalNonInteractions = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
+        else:
+            drugDisease = np.loadtxt('./data/' + 'LAGCN' + '/therapeutic.txt', delimiter=' ')
+            totalInteractions = np.array(np.mat(np.where(drugDisease == 1)).T) #(6244, 2)
+            totalNonInteractions = np.array(np.mat(np.where(drugDisease < 1)).T) #(154618, 2)
 
         data['drug'].x = torch.eye(numbers.get('drug'), dtype=torch.float)
         data['disease'].x = torch.tensor(np.loadtxt('./data/LAGCN/dis_sim.csv', delimiter=','), dtype=torch.float)        
@@ -55,10 +60,10 @@ def dataloader(dataset):
         data['target'].x = torch.eye(numbers.get('target'), dtype=torch.float)
         data['structure'].x = torch.eye(numbers.get('structure'), dtype=torch.float)
       
-        data['drug', 'edge', 'pathway'].edge_index = makePosEdgeIndex(dataset, 'drug_pathway.txt', ' ')
-        data['drug', 'edge', 'enzyme'].edge_index = makePosEdgeIndex(dataset, 'drug_enzyme.txt', ' ')
-        data['drug', 'edge', 'target'].edge_index = makePosEdgeIndex(dataset, 'drug_target.txt', ' ')
-        data['drug', 'edge', 'structure'].edge_index = makePosEdgeIndex(dataset, 'drug_structure.txt', ' ')
+        data['drug', 'edge', 'pathway'].edge_index = makePosEdgeIndex('LAGCN', 'drug_pathway.txt', ' ')
+        data['drug', 'edge', 'enzyme'].edge_index = makePosEdgeIndex('LAGCN', 'drug_enzyme.txt', ' ')
+        data['drug', 'edge', 'target'].edge_index = makePosEdgeIndex('LAGCN', 'drug_target.txt', ' ')
+        data['drug', 'edge', 'structure'].edge_index = makePosEdgeIndex('LAGCN', 'drug_structure.txt', ' ')
 
     elif dataset == 'MGATRx':
         numbers = {
@@ -92,4 +97,4 @@ def dataloader(dataset):
         data['disease', 'edge', 'pathway'].edge_index = makePosEdgeIndex(dataset, 'disease-pathways.txt', ' ')
         data['disease', 'edge', 'target'].edge_index = makePosEdgeIndex(dataset, 'disease-targets.txt', ' ')
 
-    return data, totalInteractions, totalNonInteractions
+    return data, totalInteractions, totalNonInteractions, numbers.get('interactions'), numbers.get('nonInteractions')
