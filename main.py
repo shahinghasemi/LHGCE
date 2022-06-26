@@ -15,11 +15,10 @@ torch.use_deterministic_algorithms(True)
 
 # Parsing CLI args.
 parser = argparse.ArgumentParser(description='Options')
-parser.add_argument('--dataset', help='dataset to use', type=str, default='lagcn')
+parser.add_argument('--dataset', help='dataset to use', type=str, default='LAGCN')
 parser.add_argument('--epochs', help='number of epochs to train in model',type=int, default=20)
 parser.add_argument('--thr-percent', help='the threshold percentage with respect to batch size',type=int, default=5)
-parser.add_argument('--dropout', help='dropout probability for DNN',type=float, default=0.3)
-parser.add_argument('--lr', help='learning rate for DNN',type=float, default=0.01)
+parser.add_argument('--lr', help='learning rate for optimizer function',type=float, default=0.01)
 parser.add_argument('--agg', help='aggregation method for Linear layer to predict', type=str, default='concatenate')
 parser.add_argument('--l', help='number of layers for graph convolutional encoder', type=int, default=2)
 parser.add_argument('--n', help='number of neurons for each GCE layer', type=int, default=32)
@@ -32,7 +31,6 @@ print(args)
 # Setting the dynamic global variables
 DATASET = args.dataset
 EPOCHS = args.epochs
-DROPOUT = args.dropout #useless
 THRESHOLD_PERCENT = args.thr_percent
 LEARNING_RATE= args.lr
 AGGREGATOR = args.agg
@@ -40,7 +38,6 @@ LAYERS = args.l
 NEURONS = args.n
 SAME_NEGATIVE = args.same
 NEGATIVE_SPLIT = args.negative_split
-# Setting the static global variables
 FOLDS = 5
 
 def main():

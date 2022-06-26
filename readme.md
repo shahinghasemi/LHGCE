@@ -1,9 +1,2 @@
-# EMRGCEL #
-## End to end Multi-Relational Heterogeneous Graph Convolutional Encoder Network with Linear layer ##
+# Source code for "Drug-Disease Association Prediction Based on end-to-end Multi-Layer Heterogeneous Graph Convolutional Encoders" paper
 
-
-This proposed method consists of two main components:
-
-- ## Encoder ##
-
-TODO: For LRSSL dataset I guess 1500 epochs is better than 2000
