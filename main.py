@@ -16,7 +16,7 @@ torch.use_deterministic_algorithms(True)
 # Parsing CLI args.
 parser = argparse.ArgumentParser(description='Options')
 parser.add_argument('--dataset', help='dataset to use', type=str, default='LAGCN')
-parser.add_argument('--epochs', help='number of epochs to train in model',type=int, default=20)
+parser.add_argument('--epochs', help='number of epochs to train the model in',type=int, default=20)
 parser.add_argument('--thr-percent', help='the threshold percentage with respect to batch size',type=int, default=5)
 parser.add_argument('--lr', help='learning rate for optimizer function',type=float, default=0.01)
 parser.add_argument('--agg', help='aggregation method for Linear layer to predict', type=str, default='concatenate')
@@ -92,6 +92,7 @@ def main():
         data = T.NormalizeFeatures()(data)
 
         model = Model(data, neurons=32, layers=LAYERS, aggregator=AGGREGATOR)
+        print('modeL: ', model)
         optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
         # for x, in model.parameters():
         #     print('x: ', x)
@@ -135,8 +136,8 @@ def main():
         metric = test(data, model, THRESHOLD_PERCENT)
         metrics += metric
 
-        print('metric: ', metric)
+        print("calculated metrics in fold --> " + str(k + 1)+ ": ", metric)
     return metrics
 
 metrics = main()
-print('results: ', metrics / FOLDS)
+print('####### FINAL RESULTS #######\n', metrics / FOLDS)
