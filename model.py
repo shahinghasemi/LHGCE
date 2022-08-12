@@ -16,28 +16,24 @@ class GNNEncoder(torch.nn.Module):
         return x
 
 class EdgeDecoder(torch.nn.Module):
-    def __init__(self, neurons, aggregator):
+    def __init__(self, neurons, ):
         super().__init__()
         self.lin1 = Linear(2 * neurons, neurons)
         self.lin2 = Linear(neurons, 1)
-        self.agg = aggregator
 
     def forward(self, z_dict, edge_label_index):
         row, col = edge_label_index
-        # define the operator
-        if self.agg == 'concatenate':
-            z = torch.cat([z_dict['drug'][row], z_dict['disease'][col]], dim=-1)
-
+        z = torch.cat([z_dict['drug'][row], z_dict['disease'][col]], dim=-1)
         z = self.lin1(z).relu()
         z = self.lin2(z)
         return z.view(-1)
 
 class Model(torch.nn.Module):
-    def __init__(self, data, neurons, layers,  aggregator):
+    def __init__(self, data, neurons, layers):
         super().__init__()
         self.encoder = GNNEncoder(neurons, layers)
         self.encoder = to_hetero(self.encoder, data.metadata(), aggr='sum')
-        self.decoder = EdgeDecoder(neurons, aggregator)
+        self.decoder = EdgeDecoder(neurons)
 
     def forward(self, x_dict, edge_index_dict, edge_label_index):
         z_dict = self.encoder(x_dict, edge_index_dict)

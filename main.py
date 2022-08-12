@@ -16,10 +16,9 @@ torch.use_deterministic_algorithms(True)
 # Parsing CLI args.
 parser = argparse.ArgumentParser(description='Options')
 parser.add_argument('--dataset', help='dataset to use', type=str, default='LAGCN')
-parser.add_argument('--epochs', help='number of epochs to train the model in',type=int, default=20)
-parser.add_argument('--thr-percent', help='the threshold percentage with respect to batch size',type=int, default=5)
-parser.add_argument('--lr', help='learning rate for optimizer function',type=float, default=0.01)
-parser.add_argument('--agg', help='aggregation method for Linear layer to predict', type=str, default='concatenate')
+parser.add_argument('--epochs', help='number of epochs to train the model in',type=int, default=3000)
+parser.add_argument('--thr-percent', help='the threshold percentage with respect to batch size',type=int, default=3)
+parser.add_argument('--lr', help='learning rate for optimizer function',type=float, default=0.005)
 parser.add_argument('--l', help='number of layers for graph convolutional encoder', type=int, default=2)
 parser.add_argument('--n', help='number of neurons for each GCE layer', type=int, default=32)
 parser.add_argument('--same', help='whether the same number of negatives should be selected as positives(interations)', type=lambda x: (str(x).lower() == 'true'), default=False)
@@ -33,7 +32,6 @@ DATASET = args.dataset
 EPOCHS = args.epochs
 THRESHOLD_PERCENT = args.thr_percent
 LEARNING_RATE= args.lr
-AGGREGATOR = args.agg
 LAYERS = args.l
 NEURONS = args.n
 SAME_NEGATIVE = args.same
@@ -91,8 +89,7 @@ def main():
         data = T.AddSelfLoops()(data)
         data = T.NormalizeFeatures()(data)
 
-        model = Model(data, neurons=32, layers=LAYERS, aggregator=AGGREGATOR)
-        print('modeL: ', model)
+        model = Model(data, neurons=NEURONS, layers=LAYERS)
         optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
         # for x, in model.parameters():
         #     print('x: ', x)
@@ -140,4 +137,5 @@ def main():
     return metrics
 
 metrics = main()
+print("####### PARAMETERS #######", args)
 print('####### FINAL RESULTS #######\n', metrics / FOLDS)
