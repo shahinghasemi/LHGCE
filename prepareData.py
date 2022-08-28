@@ -5,6 +5,7 @@ from sklearn.decomposition import PCA
 import torch
 from torch_geometric.data import HeteroData
 import pandas as pd
+import json
 
 FOLDS = 5
 # def Cosine(matrix)
@@ -14,9 +15,32 @@ def Jaccard(matrix):
     denominator = np.ones(np.shape(matrix)) * matrix.T + matrix * np.ones(np.shape(matrix.T)) - matrix * matrix.T
     return np.array(numerator / denominator)
 
+def extractId():
+    chemicalDic = {}
+    diseaseDic = {}
+
+    data = sio.loadmat('./data/LAGCN/SCMFDD_Dataset.mat')
+
+    chemicals = data['chemical_list']
+    diseases = data['disease_list']
+
+    for i in range(len(chemicals)):
+        chemical = chemicals[i][0][0]
+        chemicalDic.update({chemical: i})
+
+    for i in range(len(diseases)):
+        disease = diseases[i][0][0]
+        diseaseDic.update({disease: i})
+        
+    with open('./data/LAGCN/diseaseIndex.json', 'w') as convert_file:
+        convert_file.write(json.dumps(diseaseDic))
+
+    with open('./data/LAGCN/chemicalIndex.json', 'w') as convert_file:
+        convert_file.write(json.dumps(diseaseDic))
+
+
 def readFromMat():
-    data = sio.loadmat('./data/lagcn/SCMFDD_Dataset.mat')
-    print('data.keys(): ', data.keys())
+    data = sio.loadmat('./data/LAGCN/SCMFDD_Dataset.mat')
 
     np.savetxt('./drugDrug_feature_matrix.txt', np.array(data['drug_drug_interaction_feature_matrix']))
     np.savetxt('./structure_feature_matrix.txt', np.array(data['structure_feature_matrix']))
@@ -24,15 +48,6 @@ def readFromMat():
     np.savetxt('./enzyme_feature_matrix.txt', np.array(data['enzyme_feature_matrix']))
     np.savetxt('./pathway_feature_matrix.txt', np.array(data['pathway_feature_matrix']))
 
-def plotAndSave(X, Y, labels, feature):
-    print('about to draw: X[0].shape: ', X[0].shape,  'X[1].shape: ', X[1].shape)
-    print('about to draw: Y[0].shape: ', Y[0].shape,  'Y[1].shape: ', Y[1].shape)
-
-    plt.scatter(X[0], Y[0], c='blue', marker='.', linewidth=0, s=10, alpha=0.8, label=labels[0])
-    plt.scatter(X[1], Y[1], c='red', marker='o', linewidth=0, s=10, alpha=0.8, label=labels[1])
-    plt.grid()
-    plt.legend()
-    plt.show()
 
 def splitEdgesBasedOnFolds(interactionsIndicesFolds, k):
     testEdgesIndex = interactionsIndicesFolds[k]
@@ -88,25 +103,6 @@ def makePosEdgeIndex(dataset, name, delimiter=',', percent = 100, dataframe=Fals
     edgeIndex = torch.tensor(edgeIndex, dtype=torch.long)
     return edgeIndex
 
-def createHeteroNetwork(dicNumber, featureName):
-    data = HeteroData()
-    # dicNumber = {
-    #     'drug': DRUG_NUMBER,
-    #     'disease': DISEASE_NUMBER,
-    #     'pathway': PATHWAY_NUMBER,
-    #     'enzyme': ENZYME_NUMBER,
-    #     'structure': STRUCTURE_NUMBER,
-    #     'target': TARGET_NUMBER
-    # }
-
-    data['drug'].x = torch.eye(DRUG_NUMBER, dtype=torch.float)
-    data['disease'].x = torch.tensor(np.loadtxt('./data/lagcn/dis_sim.csv', delimiter=','), dtype=torch.float)
-
-    for featureName in featureList:
-        data[featureName].x = torch.eye(dicNumber[featureName], dtype=torch.float)
-        data['drug', 'edge', featureName].edge_index = makePosEdgeIndex(featureName)
-
-    return data
 
 def prepareDrugData(featureList, embeddingMethod):
     featureMatrixDic = {}

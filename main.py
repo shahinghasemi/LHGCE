@@ -1,5 +1,5 @@
 import torch_geometric.transforms as T
-from prepareData import splitter, foldify, createHeteroNetwork, splitEdgesBasedOnFolds
+from prepareData import splitter, foldify, splitEdgesBasedOnFolds, extractId
 import torch
 import argparse
 import torch_geometric
@@ -129,7 +129,6 @@ def main():
         
         data['drug', 'treats', 'disease'].edge_label_index = torch.cat([edge_label_index, neg_edge_index], dim=-1)
         data['drug', 'treats', 'disease'].edge_label = edge_label
-        
         metric = test(data, model, THRESHOLD_PERCENT)
         metrics += metric
 
@@ -139,3 +138,5 @@ def main():
 metrics = main()
 print("####### PARAMETERS #######", args)
 print('####### FINAL RESULTS #######\n', metrics / FOLDS)
+
+# extractId()

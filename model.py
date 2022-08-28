@@ -57,6 +57,7 @@ def test(test_data, model, thresholdPercent):
     pred = pred.detach().numpy()
     edge_label = test_data['drug','treats', 'disease'].edge_label.detach().numpy()
 
-    metrics = calculateMetric(edge_label, pred, thresholdPercent)
+    edge_label_index = test_data['drug', 'treats', 'disease'].edge_label_index
+    metrics = calculateMetric(edge_label, pred, edge_label_index, thresholdPercent)
     return metrics
 
