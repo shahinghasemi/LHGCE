@@ -7,12 +7,15 @@ class GNNEncoder(torch.nn.Module):
     def __init__(self, neurons, layers):
         super().__init__()
         self.layers = layers
-        self.conv1 = SAGEConv((-1, -1), neurons)
-        self.conv2 = SAGEConv((-1, -1), neurons)
+        self.convs = ModuleList([SAGEConv((-1, -1), neurons) for i in range(self.layers)])
 
     def forward(self, x, edge_index):
-        x = self.conv1(x, edge_index).relu()
-        x = self.conv2(x, edge_index)
+        for i, l in enumerate(self.convs):
+            if i == self.layers - 1:
+                x = self.convs[i](x, edge_index)
+            else:
+                x = self.convs[i](x, edge_index).relu()
+
         return x
 
 class EdgeDecoder(torch.nn.Module):
