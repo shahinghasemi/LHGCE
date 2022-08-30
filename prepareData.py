@@ -50,14 +50,10 @@ def readFromMat():
 
 
 def splitEdgesBasedOnFolds(interactionsIndicesFolds, k):
-    testEdgesIndex = interactionsIndicesFolds[k]
-    # if(k+1 == FOLDS):
-    #     k = 0
-    # superVisionEdgesIndex = interactionsIndicesFolds[k+1]
-    # usedIndices = np.concatenate((testEdgesIndex, superVisionEdgesIndex), axis=0)
-    messageEdgesIndex = np.setdiff1d(interactionsIndicesFolds.flatten(), testEdgesIndex, assume_unique=True)
-    superVisionEdgesIndex = messageEdgesIndex
-    return messageEdgesIndex, superVisionEdgesIndex, testEdgesIndex
+    testSuperVisionEdgesIndex = interactionsIndicesFolds[k]
+    messageEdgesIndex = np.setdiff1d(interactionsIndicesFolds.flatten(), testSuperVisionEdgesIndex, assume_unique=True)
+    trainSuperVisionEdgesIndex = messageEdgesIndex
+    return messageEdgesIndex, trainSuperVisionEdgesIndex, testSuperVisionEdgesIndex
 
 def splitter(sameSize, interactions, nonInteractions, INTERACTIONS_NUMBER, NONINTERACTIONS_NUMBER):
     # remove some samples to be dividable by the folds
@@ -65,14 +61,15 @@ def splitter(sameSize, interactions, nonInteractions, INTERACTIONS_NUMBER, NONIN
     nonInteractionSelectionSize = NONINTERACTIONS_NUMBER - (NONINTERACTIONS_NUMBER % FOLDS)
 
     # choose randomly
-    interactionsIndices = np.random.choice(INTERACTIONS_NUMBER, interactionSelectionSize)
+    interactionsIndices = np.random.choice(INTERACTIONS_NUMBER, interactionSelectionSize, replace=False)
     if sameSize:
-        nonInteractionsIndices = np.random.choice(NONINTERACTIONS_NUMBER, interactionSelectionSize)
+        nonInteractionsIndices = np.random.choice(NONINTERACTIONS_NUMBER, interactionSelectionSize, replace=False)
     else:
-        nonInteractionsIndices = np.random.choice(NONINTERACTIONS_NUMBER, nonInteractionSelectionSize)
+        nonInteractionsIndices = np.random.choice(NONINTERACTIONS_NUMBER, nonInteractionSelectionSize, replace=False)
 
-    selectedNonInteractionsPairs = nonInteractions[nonInteractionsIndices]
     selectedInteractionsPairs = interactions[interactionsIndices]
+    selectedNonInteractionsPairs = nonInteractions[nonInteractionsIndices]
+
     return selectedInteractionsPairs, selectedNonInteractionsPairs
 
 def foldify(totalInteractions, totalNonInteractions):

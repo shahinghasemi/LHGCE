@@ -2,11 +2,11 @@
 from sklearn.metrics import accuracy_score, f1_score, roc_curve, auc, recall_score, confusion_matrix, precision_score
 import numpy as np
 
-def calculateMetric(real_score, predict_score, edge_label_index, thresholdPercent):
+def calculateMetric(real_score, predict_score, edge_label_index, edge_label, thresholdPercent):
     real_score = real_score.reshape((real_score.shape[0],))
     predict_score = predict_score.reshape((predict_score.shape[0],))
 
-    topPredictedPairs(predict_score, edge_label_index)
+    topPredictedPairs(predict_score, edge_label_index, edge_label)
 
     thresholds = thresholdCalculation(predict_score, thresholdPercent)
     thresholds = np.mat(thresholds)
@@ -80,16 +80,22 @@ def thresholdCalculation(predict_score, percent):
     thresholds = sorted_predict_score[indexes]
     return thresholds
 
-def topPredictedPairs(predictScoreArray, edge_label_index):
+def topPredictedPairs(predictScoreArray, edge_label_index, edge_label):
     dic = {}
     for i in range(len(predictScoreArray)):
-        dic.update({predictScoreArray[i]: i})
+        dic.update({ i: predictScoreArray[i] })
 
     sortedPredictionScores = np.sort(predictScoreArray)
     for i in range(1, 11):
         predictionScore = sortedPredictionScores[-i]
-        index = dic[predictionScore]
-        drug = edge_label_index[0][index]
-        disease = edge_label_index[1][index]
-        print(i, ': ', 'drug: ', drug)
-        print(i, ': ', 'disease: ', disease)
+        for key, value in dic.items():
+            if value == predictionScore:
+                drug = edge_label_index[0][key]
+                disease = edge_label_index[1][key]
+                print(i, ': ', 'drug: ', drug)
+                print(i, ': ', 'disease: ', disease)
+                print(i, ': label: ', edge_label[key])
+                print('------------------------------')
+                dic.pop(key)
+                break
+

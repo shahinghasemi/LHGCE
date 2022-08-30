@@ -47,11 +47,12 @@ def main():
     metrics = np.zeros(7)
 
     for k in range(FOLDS):
-        messageEdgesIndex, superVisionEdgesIndex, testEdgesIndex = splitEdgesBasedOnFolds(interactionsIndicesFolds, k)
+        messageEdgesIndex, trainSuperVisionEdgesIndex, testSuperVisionEdgesIndex = splitEdgesBasedOnFolds(interactionsIndicesFolds, k)
 
         testNonEdgesIndex = nonInteractionsIndicesFolds[k]
         trainNonEdgesIndex = np.setdiff1d(nonInteractionsIndicesFolds.flatten(), testNonEdgesIndex, assume_unique=True)
 
+        # edge_index does not need to be set in testing because otherwise causes data leak
         edge_index = [[], []]
         for drugIndex, diseaseIndex in selectedInteractions[messageEdgesIndex]:
             edge_index[0].append(drugIndex)
@@ -62,27 +63,27 @@ def main():
 
         #------------------Training------------------#
         edge_label_index = [[], []]
-        neg_edge_index = [[], []]
+        neg_edge_label_index = [[], []]
         edge_label = []
-        for drugIndex, diseaseIndex in selectedInteractions[superVisionEdgesIndex]:
+        for drugIndex, diseaseIndex in selectedInteractions[trainSuperVisionEdgesIndex]:
             edge_label_index[0].append(drugIndex)
             edge_label_index[1].append(diseaseIndex)
             edge_label.append(1)
         if NEGATIVE_SPLIT == 'fold':
             for drugIndex, diseaseIndex in selectedNonInteractions[trainNonEdgesIndex]:
-                neg_edge_index[0].append(drugIndex)
-                neg_edge_index[1].append(diseaseIndex)
+                neg_edge_label_index[0].append(drugIndex)
+                neg_edge_label_index[1].append(diseaseIndex)
                 edge_label.append(0)
         elif NEGATIVE_SPLIT == 'all':
             for drugIndex, diseaseIndex in selectedNonInteractions:
-                neg_edge_index[0].append(drugIndex)
-                neg_edge_index[1].append(diseaseIndex)
+                neg_edge_label_index[0].append(drugIndex)
+                neg_edge_label_index[1].append(diseaseIndex)
                 edge_label.append(0)
         edge_label_index = torch.tensor(edge_label_index, dtype=torch.long)
-        neg_edge_index = torch.tensor(neg_edge_index, dtype=torch.long)
+        neg_edge_label_index = torch.tensor(neg_edge_label_index, dtype=torch.long)
         edge_label = torch.tensor(edge_label, dtype=torch.float)
 
-        data['drug', 'treats', 'disease'].edge_label_index = torch.cat([edge_label_index, neg_edge_index],dim=-1)
+        data['drug', 'treats', 'disease'].edge_label_index = torch.cat([edge_label_index, neg_edge_label_index],dim=-1)
         data['drug', 'treats', 'disease'].edge_label = edge_label
 
         data = T.ToUndirected()(data)
@@ -107,27 +108,27 @@ def main():
         
         #------------------Testing------------------#
         edge_label_index = [[], []]
-        neg_edge_index = [[], []]
+        neg_edge_label_index = [[], []]
         edge_label = []
-        for drugIndex, diseaseIndex in selectedInteractions[testEdgesIndex]:
+        for drugIndex, diseaseIndex in selectedInteractions[testSuperVisionEdgesIndex]:
             edge_label_index[0].append(drugIndex)
             edge_label_index[1].append(diseaseIndex)
             edge_label.append(1)
         if NEGATIVE_SPLIT == 'fold':
             for drugIndex, diseaseIndex in selectedNonInteractions[testNonEdgesIndex]:
-                neg_edge_index[0].append(drugIndex)
-                neg_edge_index[1].append(diseaseIndex)
+                neg_edge_label_index[0].append(drugIndex)
+                neg_edge_label_index[1].append(diseaseIndex)
                 edge_label.append(0)
         elif NEGATIVE_SPLIT == 'all':
             for drugIndex, diseaseIndex in selectedNonInteractions:
-                neg_edge_index[0].append(drugIndex)
-                neg_edge_index[1].append(diseaseIndex)
+                neg_edge_label_index[0].append(drugIndex)
+                neg_edge_label_index[1].append(diseaseIndex)
                 edge_label.append(0)
         edge_label_index = torch.tensor(edge_label_index, dtype=torch.long)
-        neg_edge_index = torch.tensor(neg_edge_index, dtype=torch.long)
+        neg_edge_label_index = torch.tensor(neg_edge_label_index, dtype=torch.long)
         edge_label = torch.tensor(edge_label, dtype=torch.float)
         
-        data['drug', 'treats', 'disease'].edge_label_index = torch.cat([edge_label_index, neg_edge_index], dim=-1)
+        data['drug', 'treats', 'disease'].edge_label_index = torch.cat([edge_label_index, neg_edge_label_index], dim=-1)
         data['drug', 'treats', 'disease'].edge_label = edge_label
         metric = test(data, model, THRESHOLD_PERCENT)
         metrics += metric
