@@ -17,7 +17,9 @@ torch.use_deterministic_algorithms(True)
 parser = argparse.ArgumentParser(description='Options')
 parser.add_argument('--dataset', help='dataset to use', type=str, default='LAGCN')
 parser.add_argument('--epochs', help='number of epochs to train the model in',type=int, default=3000)
-parser.add_argument('--thr-percent', help='the threshold percentage with respect to batch size',type=int, default=3)
+parser.add_argument('--folds', help='number of folds',type=int, default=5)
+parser.add_argument('--fold', help='specific fold to train on',type=int, default=0)
+parser.add_argument('--thr-percent', help='the threshold percentage with respect to batch size',type=float, default=3)
 parser.add_argument('--lr', help='learning rate for optimizer function',type=float, default=0.005)
 parser.add_argument('--l', help='number of layers for graph convolutional encoder', type=int, default=2)
 parser.add_argument('--n', help='number of neurons for each GCE layer', type=int, default=32)
@@ -36,7 +38,8 @@ LAYERS = args.l
 NEURONS = args.n
 SAME_NEGATIVE = args.same
 NEGATIVE_SPLIT = args.negative_split
-FOLDS = 5
+FOLDS = args.folds
+FOLD = args.fold
 
 def main():
     data, totalInteractions, totalNonInteractions, INTERACTIONS_NUMBER, NONINTERACTIONS_NUMBER = dataloader(DATASET)
@@ -46,7 +49,11 @@ def main():
 
     metrics = np.zeros(7)
 
-    for k in range(FOLDS):
+    if FOLD != 0:
+        customRange = range(FOLD, FOLD+1, 1) 
+    else:
+        customRange = range(FOLDS)
+    for k in customRange:
         messageEdgesIndex, trainSuperVisionEdgesIndex, testSuperVisionEdgesIndex = splitEdgesBasedOnFolds(interactionsIndicesFolds, k)
 
         testNonEdgesIndex = nonInteractionsIndicesFolds[k]
