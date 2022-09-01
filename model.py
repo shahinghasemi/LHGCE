@@ -1,5 +1,5 @@
 from metrics import calculateMetric
-from torch_geometric.nn import SAGEConv, to_hetero
+from torch_geometric.nn import SAGEConv, to_hetero, GATv2Conv
 import torch
 from torch.nn import Linear, ModuleList
 
@@ -18,6 +18,16 @@ class GNNEncoder(torch.nn.Module):
 
         return x
 
+class GNNEncoder2(torch.nn.Module):
+    def __init__(self, neurons):
+        super().__init__()
+        self.conv = GATv2Conv((-1, -1), neurons, add_self_loops=False)
+
+    def forward(self, x, edge_index):
+        x = self.conv(x, edge_index).relu()
+
+        return x
+
 class EdgeDecoder(torch.nn.Module):
     def __init__(self, neurons, ):
         super().__init__()
@@ -32,9 +42,13 @@ class EdgeDecoder(torch.nn.Module):
         return z.view(-1)
 
 class Model(torch.nn.Module):
-    def __init__(self, data, neurons, layers):
+    def __init__(self, data, neurons, layers, encoderType):
         super().__init__()
-        self.encoder = GNNEncoder(neurons, layers)
+        if encoderType == 'SAGE':
+            self.encoder = GNNEncoder(neurons, layers)
+        elif encoderType == 'attention':
+            self.encoder = GNNEncoder2(neurons)
+
         self.encoder = to_hetero(self.encoder, data.metadata(), aggr='sum')
         self.decoder = EdgeDecoder(neurons)
 
