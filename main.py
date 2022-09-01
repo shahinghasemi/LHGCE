@@ -51,8 +51,10 @@ def main():
 
     if FOLD != 0:
         customRange = range(FOLD, FOLD+1, 1) 
+        divider = 1
     else:
         customRange = range(FOLDS)
+        divider = FOLDS
     for k in customRange:
         messageEdgesIndex, trainSuperVisionEdgesIndex, testSuperVisionEdgesIndex = splitEdgesBasedOnFolds(interactionsIndicesFolds, k)
 
@@ -141,10 +143,11 @@ def main():
         metrics += metric
 
         print("calculated metrics in fold --> " + str(k + 1)+ ": ", metric)
-    return metrics
+
+    return metrics / divider
 
 metrics = main()
 print("####### PARAMETERS #######", args)
-print('####### FINAL RESULTS #######\n', metrics / FOLDS)
+print('####### FINAL RESULTS #######\n', metrics)
 
 # extractId()
