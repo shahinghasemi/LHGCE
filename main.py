@@ -26,6 +26,7 @@ parser.add_argument('--n', help='number of neurons for each GCE layer', type=int
 parser.add_argument('--same', help='whether the same number of negatives should be selected as positives(interations)', type=lambda x: (str(x).lower() == 'true'), default=False)
 parser.add_argument('--negative-split', help='how negatives should be involved in training and testing phase?', type=str, default='all')
 parser.add_argument('--encoder', help='What encoder to choose for generating the embeddings', type=str, default='SAGE')
+parser.add_argument('--aggregator', help='aggregator function for linear layers', type=str, default='concatenate')
 
 args = parser.parse_args()
 print(args)
@@ -42,6 +43,7 @@ NEGATIVE_SPLIT = args.negative_split
 FOLDS = args.folds
 FOLD = args.fold
 ENCODER = args.encoder
+AGGREGATOR = args.aggregator
 
 def main():
     data, totalInteractions, totalNonInteractions, INTERACTIONS_NUMBER, NONINTERACTIONS_NUMBER = dataloader(DATASET)
@@ -101,7 +103,7 @@ def main():
         data = T.AddSelfLoops()(data)
         data = T.NormalizeFeatures()(data)
 
-        model = Model(data, neurons=NEURONS, layers=LAYERS, encoderType=ENCODER)
+        model = Model(data, neurons=NEURONS, layers=LAYERS, encoderType=ENCODER, aggregator=AGGREGATOR)
         optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
         # for x, in model.parameters():
         #     print('x: ', x)

@@ -1,7 +1,7 @@
 from metrics import calculateMetric
 from torch_geometric.nn import SAGEConv, to_hetero, GATv2Conv
 import torch
-from torch.nn import Linear, ModuleList
+from torch.nn import Linear, ModuleList, Sequential, ReLU
 
 class GNNEncoder(torch.nn.Module):
     def __init__(self, neurons, layers):
@@ -29,20 +29,49 @@ class GNNEncoder2(torch.nn.Module):
         return x
 
 class EdgeDecoder(torch.nn.Module):
-    def __init__(self, neurons, ):
+    def __init__(self, neurons, aggregator):
         super().__init__()
-        self.lin1 = Linear(2 * neurons, neurons)
-        self.lin2 = Linear(neurons, 1)
+
+        if aggregator == 'concatenate':
+            self.linear = Sequential(
+                Linear(2 * neurons, neurons),
+                ReLU(),
+                Linear(neurons, 1)
+            )
+        elif aggregator == 'mean' or aggregator == 'sum' or aggregator == 'max' or aggregator == 'mul':
+            self.linear = Sequential(
+                Linear(neurons, neurons),
+                ReLU(),
+                Linear(neurons, 1)
+            )       
+
+        self.aggregator = aggregator
 
     def forward(self, z_dict, edge_label_index):
         row, col = edge_label_index
-        z = torch.cat([z_dict['drug'][row], z_dict['disease'][col]], dim=-1)
-        z = self.lin1(z).relu()
-        z = self.lin2(z)
+        if self.aggregator == 'concatenate':
+            z = torch.cat([z_dict['drug'][row], z_dict['disease'][col]], dim=-1)
+
+        elif self.aggregator == 'mean':
+            drug = z_dict['drug'][row]
+            disease = z_dict['disease'][col]
+            z = ((drug + disease) /2)
+
+        elif self.aggregator == 'sum':
+            drug = z_dict['drug'][row]
+            disease = z_dict['disease'][col]
+            z = drug + disease 
+
+        elif self.aggregator == 'mul':
+            drug = z_dict['drug'][row]
+            disease = z_dict['disease'][col]
+            z = drug * disease 
+
+        z = self.linear(z)
         return z.view(-1)
 
 class Model(torch.nn.Module):
-    def __init__(self, data, neurons, layers, encoderType):
+    def __init__(self, data, neurons, layers, encoderType, aggregator):
         super().__init__()
         if encoderType == 'SAGE':
             self.encoder = GNNEncoder(neurons, layers)
@@ -50,7 +79,7 @@ class Model(torch.nn.Module):
             self.encoder = GNNEncoder2(neurons)
 
         self.encoder = to_hetero(self.encoder, data.metadata(), aggr='sum')
-        self.decoder = EdgeDecoder(neurons)
+        self.decoder = EdgeDecoder(neurons, aggregator)
 
     def forward(self, x_dict, edge_index_dict, edge_label_index):
         z_dict = self.encoder(x_dict, edge_index_dict)
