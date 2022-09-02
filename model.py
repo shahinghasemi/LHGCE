@@ -28,7 +28,7 @@ class GNNEncoder2(torch.nn.Module):
 
         return x
 
-class EdgeDecoder(torch.nn.Module):
+class Linears(torch.nn.Module):
     def __init__(self, neurons, aggregator):
         super().__init__()
 
@@ -79,11 +79,11 @@ class Model(torch.nn.Module):
             self.encoder = GNNEncoder2(neurons)
 
         self.encoder = to_hetero(self.encoder, data.metadata(), aggr='sum')
-        self.decoder = EdgeDecoder(neurons, aggregator)
+        self.linear = Linears(neurons, aggregator)
 
     def forward(self, x_dict, edge_index_dict, edge_label_index):
         z_dict = self.encoder(x_dict, edge_index_dict)
-        return self.decoder(z_dict, edge_label_index)
+        return self.linear(z_dict, edge_label_index)
 
 
 def train(data, model, optimizer, criterion):
