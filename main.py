@@ -109,7 +109,7 @@ def main():
         optimizer = torch.optim.Adam([
             {'params': model.linear.parameters(), 'lr': LEARNING_RATE_LINEAR},
             {'params': model.encoder.parameters(), 'lr': LEARNING_RATE_ENCODER},
-        ], weight_decay=0.00001)
+        ])
         # for x, in model.parameters():
         #     print('x: ', x)
 
