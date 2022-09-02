@@ -18,7 +18,7 @@ parser = argparse.ArgumentParser(description='Options')
 parser.add_argument('--dataset', help='dataset to use', type=str, default='LAGCN')
 parser.add_argument('--epochs', help='number of epochs to train the model in',type=int, default=3000)
 parser.add_argument('--folds', help='number of folds',type=int, default=5)
-parser.add_argument('--fold', help='specific fold to train on',type=int, default=0)
+parser.add_argument('--fold', help='specific fold to train on',type=int, default=-1)
 parser.add_argument('--thr-percent', help='the threshold percentage with respect to batch size',type=float, default=3)
 parser.add_argument('--lr', help='learning rate for optimizer function',type=float, default=0.005)
 parser.add_argument('--l', help='number of layers for graph convolutional encoder', type=int, default=2)
@@ -51,7 +51,7 @@ def main():
 
     metrics = np.zeros(7)
 
-    if FOLD != 0:
+    if FOLD != -1:
         customRange = range(FOLD, FOLD+1, 1) 
         divider = 1
     else:
