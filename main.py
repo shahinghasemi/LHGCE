@@ -20,8 +20,8 @@ parser.add_argument('--epochs', help='number of epochs to train the model in',ty
 parser.add_argument('--folds', help='number of folds',type=int, default=5)
 parser.add_argument('--fold', help='specific fold to train on',type=int, default=-1)
 parser.add_argument('--thr-percent', help='the threshold percentage with respect to batch size',type=float, default=3)
-parser.add_argument('--lr-encoder', help='learning rate of optimizer function for encoder',type=float, default=0.005)
-parser.add_argument('--lr-linear', help='learning rate of optimizer function for linear',type=float, default=0.005)
+parser.add_argument('--lr-encoder', help='learning rate of optimizer function for encoder',type=float, default=0.001)
+parser.add_argument('--lr-linear', help='learning rate of optimizer function for linear',type=float, default=0.001)
 parser.add_argument('--l', help='number of layers for graph convolutional encoder', type=int, default=2)
 parser.add_argument('--n', help='number of neurons for each GCE layer', type=int, default=32)
 parser.add_argument('--same', help='whether the same number of negatives should be selected as positives(interations)', type=lambda x: (str(x).lower() == 'true'), default=False)
@@ -106,11 +106,10 @@ def main():
         data = T.NormalizeFeatures()(data)
 
         model = Model(data, neurons=NEURONS, layers=LAYERS, encoderType=ENCODER, aggregator=AGGREGATOR)
-
         optimizer = torch.optim.Adam([
             {'params': model.linear.parameters(), 'lr': LEARNING_RATE_LINEAR},
             {'params': model.encoder.parameters(), 'lr': LEARNING_RATE_ENCODER},
-        ], weight_decay=0.001)
+        ], weight_decay=0.00001)
         # for x, in model.parameters():
         #     print('x: ', x)
 

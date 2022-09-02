@@ -1,5 +1,5 @@
 from metrics import calculateMetric
-from torch_geometric.nn import SAGEConv, to_hetero, GATv2Conv
+from torch_geometric.nn import SAGEConv, to_hetero, GATv2Conv, GraphSAGE
 import torch
 from torch.nn import Linear, ModuleList, Sequential, ReLU
 
@@ -19,14 +19,14 @@ class GNNEncoder(torch.nn.Module):
         return x
 
 class GNNEncoder2(torch.nn.Module):
-    def __init__(self, neurons):
+    def __init__(self, neurons, layers):
         super().__init__()
-        self.conv = GATv2Conv((-1, -1), neurons, add_self_loops=False)
-
+        self.layers = layers
+        self.c = GraphSAGE(in_channels=(-1, -1), hidden_channels=neurons, num_layers=self.layers, out_channels=neurons, dropout=0.3)
+        # print('self.c', self.c)
     def forward(self, x, edge_index):
-        x = self.conv(x, edge_index).relu()
+        return self.c(x, edge_index)
 
-        return x
 
 class Linears(torch.nn.Module):
     def __init__(self, neurons, aggregator):
@@ -75,8 +75,6 @@ class Model(torch.nn.Module):
         super().__init__()
         if encoderType == 'SAGE':
             self.encoder = GNNEncoder(neurons, layers)
-        elif encoderType == 'attention':
-            self.encoder = GNNEncoder2(neurons)
 
         self.encoder = to_hetero(self.encoder, data.metadata(), aggr='sum')
         self.linear = Linears(neurons, aggregator)
