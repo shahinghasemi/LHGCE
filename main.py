@@ -20,13 +20,11 @@ parser.add_argument('--epochs', help='number of epochs to train the model in',ty
 parser.add_argument('--folds', help='number of folds',type=int, default=5)
 parser.add_argument('--fold', help='specific fold to train on',type=int, default=-1)
 parser.add_argument('--thr-percent', help='the threshold percentage with respect to batch size',type=float, default=3)
-parser.add_argument('--lr-encoder', help='learning rate of optimizer function for encoder',type=float, default=0.001)
-parser.add_argument('--lr-linear', help='learning rate of optimizer function for linear',type=float, default=0.001)
-parser.add_argument('--l', help='number of layers for graph convolutional encoder', type=int, default=2)
+parser.add_argument('--lr', help='learning rate of optimizer function',type=float, default=0.001)
+parser.add_argument('--l', help='number of layers for graph convolutional encoder', type=int, default=1)
 parser.add_argument('--n', help='number of neurons for each GCE layer', type=int, default=32)
 parser.add_argument('--same', help='whether the same number of negatives should be selected as positives(interations)', type=lambda x: (str(x).lower() == 'true'), default=False)
 parser.add_argument('--negative-split', help='how negatives should be involved in training and testing phase?', type=str, default='all')
-parser.add_argument('--encoder', help='What encoder to choose for generating the embeddings', type=str, default='SAGE')
 parser.add_argument('--aggregator', help='aggregator function for linear layers', type=str, default='concatenate')
 
 args = parser.parse_args()
@@ -36,21 +34,20 @@ print(args)
 DATASET = args.dataset
 EPOCHS = args.epochs
 THRESHOLD_PERCENT = args.thr_percent
-LEARNING_RATE_ENCODER= args.lr_encoder
-LEARNING_RATE_LINEAR= args.lr_linear
+LEARNING_RATE= args.lr
 LAYERS = args.l
 NEURONS = args.n
 SAME_NEGATIVE = args.same
 NEGATIVE_SPLIT = args.negative_split
 FOLDS = args.folds
 FOLD = args.fold
-ENCODER = args.encoder
 AGGREGATOR = args.aggregator
 
 def main():
     data, totalInteractions, totalNonInteractions, INTERACTIONS_NUMBER, NONINTERACTIONS_NUMBER = dataloader(DATASET)
 
     selectedInteractions, selectedNonInteractions = splitter(SAME_NEGATIVE, totalInteractions, totalNonInteractions, INTERACTIONS_NUMBER, NONINTERACTIONS_NUMBER)
+    
     interactionsIndicesFolds, nonInteractionsIndicesFolds = foldify(selectedInteractions, selectedNonInteractions)
 
     metrics = np.zeros(7)
@@ -104,21 +101,17 @@ def main():
         data = T.ToUndirected()(data)
         data = T.AddSelfLoops()(data)
         data = T.NormalizeFeatures()(data)
+        print('hetero data: ', data)
 
-        model = Model(data, neurons=NEURONS, layers=LAYERS, encoderType=ENCODER, aggregator=AGGREGATOR)
-        optimizer = torch.optim.Adam([
-            {'params': model.linear.parameters(), 'lr': LEARNING_RATE_LINEAR},
-            {'params': model.encoder.parameters(), 'lr': LEARNING_RATE_ENCODER},
-        ])
-        # for x, in model.parameters():
-        #     print('x: ', x)
+        model = Model(data, neurons=NEURONS, layers=LAYERS, aggregator=AGGREGATOR)
+        optimizer = torch.optim.Adam(model.parameters(), LEARNING_RATE)
 
         # Due to lazy initialization, we need to run one model step so the number
         # of parameters can be inferred:
         with torch.no_grad():
             model.encoder(data.x_dict, data.edge_index_dict)
 
-        criterion = torch.nn.BCEWithLogitsLoss()
+        criterion = torch.nn.BCEWithLogitsLoss(pos_weight = torch.tensor(NONINTERACTIONS_NUMBER / INTERACTIONS_NUMBER))
         for epoch in range(1, EPOCHS):
             loss = train(data, model, optimizer, criterion)
             if epoch % 10 == 0:

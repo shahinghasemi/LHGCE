@@ -18,15 +18,6 @@ class GNNEncoder(torch.nn.Module):
 
         return x
 
-class GNNEncoder2(torch.nn.Module):
-    def __init__(self, neurons, layers):
-        super().__init__()
-        self.layers = layers
-        self.c = GraphSAGE(in_channels=(-1, -1), hidden_channels=neurons, num_layers=self.layers, out_channels=neurons, dropout=0.3)
-        # print('self.c', self.c)
-    def forward(self, x, edge_index):
-        return self.c(x, edge_index)
-
 
 class Linears(torch.nn.Module):
     def __init__(self, neurons, aggregator):
@@ -38,7 +29,7 @@ class Linears(torch.nn.Module):
                 ReLU(),
                 Linear(neurons, 1)
             )
-        elif aggregator == 'mean' or aggregator == 'sum' or aggregator == 'max' or aggregator == 'mul':
+        elif aggregator == 'mean' or aggregator == 'sum' or aggregator == 'mul':
             self.linear = Sequential(
                 Linear(neurons, neurons),
                 ReLU(),
@@ -71,11 +62,9 @@ class Linears(torch.nn.Module):
         return z.view(-1)
 
 class Model(torch.nn.Module):
-    def __init__(self, data, neurons, layers, encoderType, aggregator):
+    def __init__(self, data, neurons, layers, aggregator):
         super().__init__()
-        if encoderType == 'SAGE':
-            self.encoder = GNNEncoder(neurons, layers)
-
+        self.encoder = GNNEncoder(neurons, layers)
         self.encoder = to_hetero(self.encoder, data.metadata(), aggr='sum')
         self.linear = Linears(neurons, aggregator)
 
