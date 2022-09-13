@@ -27,13 +27,17 @@ class Linears(torch.nn.Module):
             self.linear = Sequential(
                 Linear(2 * neurons, neurons),
                 ReLU(),
-                Linear(neurons, 1)
+                Linear(neurons, neurons // 2),
+                ReLU(),
+                Linear(neurons // 2, 1)
             )
         elif aggregator == 'mean' or aggregator == 'sum' or aggregator == 'mul':
             self.linear = Sequential(
                 Linear(neurons, neurons),
                 ReLU(),
-                Linear(neurons, 1)
+                Linear(neurons, neurons // 2),
+                ReLU(),
+                Linear(neurons // 2, 1)
             )       
 
         self.aggregator = aggregator
