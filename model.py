@@ -1,7 +1,8 @@
 from metrics import calculateMetric
 from torch_geometric.nn import SAGEConv, to_hetero, aggr
 import torch
-from torch.nn import Linear, ModuleList, Sequential, ReLU
+from torch.nn import Linear, ModuleList, Sequential, ReLU, Dropout
+from torch.nn.functional import dropout
 
 class GNNEncoder(torch.nn.Module):
     def __init__(self, neurons, layers, aggregator):
@@ -32,6 +33,7 @@ class GNNEncoder(torch.nn.Module):
                 x = self.convs[i](x, edge_index)
             else:
                 x = self.convs[i](x, edge_index).relu()
+                x = dropout(x, p=0.25)
 
         return x
 
@@ -43,19 +45,17 @@ class Linears(torch.nn.Module):
         if aggregator == 'concatenate':
             self.linear = Sequential(
                 Linear(2 * neurons, neurons),
+                Dropout(p=0.25),
                 ReLU(),
-                Linear(neurons, neurons // 2),
-                ReLU(),
-                Linear(neurons // 2, 1)
+                Linear(neurons, 1)
             )
         elif aggregator == 'mean' or aggregator == 'sum' or aggregator == 'mul':
             self.linear = Sequential(
                 Linear(neurons, neurons),
+                Dropout(p=0.25),
                 ReLU(),
-                Linear(neurons, neurons // 2),
-                ReLU(),
-                Linear(neurons // 2, 1)
-            )       
+                Linear(neurons, 1)
+            )
 
         self.aggregator = aggregator
 
