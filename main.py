@@ -25,7 +25,9 @@ parser.add_argument('--l', help='number of layers for graph convolutional encode
 parser.add_argument('--n', help='number of neurons for each GCE layer', type=int, default=32)
 parser.add_argument('--same', help='whether the same number of negatives should be selected as positives(interations)', type=lambda x: (str(x).lower() == 'true'), default=False)
 parser.add_argument('--negative-split', help='how negatives should be involved in training and testing phase?', type=str, default='all')
-parser.add_argument('--aggregator', help='aggregator function for linear layers', type=str, default='concatenate')
+parser.add_argument('--agg-lin', help='aggregator function for linear layers', type=str)
+parser.add_argument('--agg-conv', help='aggregator function for conv layers', type=str)
+parser.add_argument('--agg-hetero', help='aggregator function for hetero layers', type=str)
 
 args = parser.parse_args()
 print(args)
@@ -41,7 +43,9 @@ SAME_NEGATIVE = args.same
 NEGATIVE_SPLIT = args.negative_split
 FOLDS = args.folds
 FOLD = args.fold
-AGGREGATOR = args.aggregator
+AGGREGATOR_LIN = args.agg_lin
+AGGREGATOR_CONV = args.agg_conv
+AGGREGATOR_HETERO = args.agg_hetero
 
 def main():
     data, totalInteractions, totalNonInteractions, INTERACTIONS_NUMBER, NONINTERACTIONS_NUMBER = dataloader(DATASET)
@@ -103,7 +107,7 @@ def main():
         data = T.NormalizeFeatures()(data)
         print('hetero data: ', data)
 
-        model = Model(data, neurons=NEURONS, layers=LAYERS, aggregator=AGGREGATOR)
+        model = Model(data=data, neurons=NEURONS, layers=LAYERS, aggregator_lin=AGGREGATOR_LIN, aggregator_conv=AGGREGATOR_CONV, aggregator_hetero=AGGREGATOR_HETERO)
         optimizer = torch.optim.Adam(model.parameters(), LEARNING_RATE)
 
         # Due to lazy initialization, we need to run one model step so the number

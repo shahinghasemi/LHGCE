@@ -1,13 +1,30 @@
 from metrics import calculateMetric
-from torch_geometric.nn import SAGEConv, to_hetero, GATv2Conv, GraphSAGE
+from torch_geometric.nn import SAGEConv, to_hetero, aggr
 import torch
 from torch.nn import Linear, ModuleList, Sequential, ReLU
 
 class GNNEncoder(torch.nn.Module):
-    def __init__(self, neurons, layers):
+    def __init__(self, neurons, layers, aggregator):
         super().__init__()
         self.layers = layers
-        self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True) for i in range(self.layers)])
+        if aggregator == 'sum':
+            self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.SumAggregation()) for i in range(self.layers)])
+        elif aggregator == 'var':
+            self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.VarAggregation()) for i in range(self.layers)])
+        elif aggregator == 'max':
+            self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.MaxAggregation()) for i in range(self.layers)])
+        elif aggregator == 'mul':
+            self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.MulAggregation()) for i in range(self.layers)])
+        elif aggregator == 'min':
+            self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.MinAggregation()) for i in range(self.layers)])
+        elif aggregator == 'power-mean':
+            self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.PowerMeanAggregation()) for i in range(self.layers)])
+        elif aggregator == 'std':
+            self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.StdAggregation()) for i in range(self.layers)])
+        elif aggregator == 'softmax':
+            self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.SoftmaxAggregation()) for i in range(self.layers)])
+        elif aggregator == 'softmax-learn':
+            self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.SoftmaxAggregation(learn=True)) for i in range(self.layers)])
 
     def forward(self, x, edge_index):
         for i, l in enumerate(self.convs):
@@ -66,11 +83,11 @@ class Linears(torch.nn.Module):
         return z.view(-1)
 
 class Model(torch.nn.Module):
-    def __init__(self, data, neurons, layers, aggregator):
+    def __init__(self, data, neurons, layers, aggregator_lin, aggregator_conv, aggregator_hetero):
         super().__init__()
-        self.encoder = GNNEncoder(neurons, layers)
-        self.encoder = to_hetero(self.encoder, data.metadata(), aggr='sum')
-        self.linear = Linears(neurons, aggregator)
+        self.encoder = GNNEncoder(neurons, layers, aggregator_conv)
+        self.encoder = to_hetero(self.encoder, data.metadata(), aggr=aggregator_hetero)
+        self.linear = Linears(neurons, aggregator_lin)
 
     def forward(self, x_dict, edge_index_dict, edge_label_index):
         z_dict = self.encoder(x_dict, edge_index_dict)
