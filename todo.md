@@ -2,4 +2,4 @@
 
 - trim the codebase, remove the unnecessary functions/directories and also clean the results 
 
-- whats the difference between creating two separate ConvSage with GraphSage(num_layers=2)?
+- add dropout to both encoder and linear layers

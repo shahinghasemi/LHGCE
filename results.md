@@ -1,14 +1,9 @@
-| desc | messageEdge | supervisionEdge | testEdge | feature list | folds | optimizer | batch size | epoch | dropout | LR | accuracy | auc | f1 | aupr | recall | specificity | precision | 
-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
-|undirected graph|  interactions that != testEdges U supervisionEdges | disjoint to messageEdges (interactions[k+1]) | interactions[k]| [t, p, e, s] | 5 | adam | batch gradient | 500 | 0 | 0.01 | 96% | 80.6% | 25% | 20.6% | 26.2% | 97.8% | 24.5%
-|undirected graph | interactions that != interactions[k] | interactions != interactions[k] (the same as message edges) | interactions[k] | [t, p, e, s] | 5 | adam | batch gradient | 500 | 0 | 0.01 | 96.7% | 87.6% | 35.4% | 32.1% | 34.8% | 98.3% | 36.5% 
-|undirected graph + weighted BCE | interactions that != interactions[k] | interactions != interactions[k] (the same as message edges) | interactions[k] | [t, p, e, s] | 5 | adam | batch gradient | 500 | 0 | 0.01 | 96.2% | 89.8% | 35.3% | 31.4% | 40.8% | 96.6% | 31.5
-|(only reverse(drug,disease) edge exist + weighted BCE | interactions that != interactions[k] | interactions != interactions[k] (the same as message edges) | interactions[k] | [t, p, e, s] | 5 | adam | batch gradient | 500 | 0 | 0.01 | 95.8% | 89.7% | 33.4% | 29.8% | 41.4% | 97.2% | 28.1% 
-| undirected graph | interactions that != interactions[k] | interactions that != interactions[k] (the same as message edges) | interactions[k] | [e, p, t, s] | 5 | adam | batch gradient | 2000 | 0 | 0.01 | 97.8% | 89.8% | 53.4% | 52.1% | 48.7% | 99.1% | 59.2% |
-| undirected graph | interactions that != interactions[k] | interactions that != interactions[k] (the same as message edges) | interactions[k] | [e, p, t, s] | 5 | adam | batch gradient | 2500 | 0 | 0.01 | 98% | 89.8% | 55.4% | 54.2% | 49.3% | 99.2% | 63.5% |
-| undirected graph | interactions that != interactions[k] | interactions that != interactions[k] (the same as message edges) | interactions[k] | [e, p, t, s] | 5 | adam | batch gradient | 3000 | 0 | 0.01 | 98% | 90% | 56.8% | 55.6% | 51.4% | 99.2% | 63.5% 
-| undirected graph, non-interactions are splited in 1/k and k-1/k | interactions that != interactions[k] | interactions that != interactions[k] (the same as message edges) | interactions[k] | [e, p, t, s] | 5 | adam | batch gradient | 3000 | 0 | 0.01 | 91.5% | 88.9% | 62.8% | 61.3% | 62.4% | 95.2% | 63.2% | 
-| undirected graph, number non-interactions = Ninteraction then are splited in 1/k and k-1/k | interactions that != interactions[k] | interactions that != interactions[k] (the same as message edges) | interactions[k] | [e, p, t, s] | 5 | adam | batch gradient | 3000 | 0 | 0.01 | 74.1% | 77.3% | 78.3% | 80.5% | 88.5% | 59.7% | 71.8%
+| parameters | aupr | auc | f1 | accuracy | recall | specificity | precision | 
+| - | - | - | - | - | - | - | - | 
+| aggregator='mul', dataset='LAGCN', encoder='SAGE', epochs=7000, fold=-1, folds=5, l=1, lr_encoder=0.001, lr_linear=0.001, n=64, negative_split='all', same=False, thr_percent=2.5 | 56% | 84.65% | 65.50% | 98.45% | 56.06% | 99.55% | 82.39% |
+| aggregator='sum', dataset='LAGCN', encoder='SAGE', epochs=7000, fold=0, folds=5, l=1, lr_encoder=0.001, lr_linear=0.001, n=64, negative_split='all', same=False, thr_percent=2.5 | 37.90% | 84.48% | 41.94% | 97.32% | 38.01% | 98.86% | 48.96% |
+| aggregator='mean', dataset='LAGCN', encoder='SAGE', epochs=7000, fold=-1, folds=5, l=1, lr_encoder=0.001, lr_linear=0.001, n=64, negative_split='all', same=False, thr_percent=2.5 | 37.03% | 84.97% | 40.46% | 97.33% | 35.86% | 98.91% | 47.81% | 
+| aggregator='concatenate', dataset='LAGCN', encoder='SAGE', epochs=7000, fold=3, folds=5, l=1, lr_encoder=0.001, lr_linear=0.001, n=64, negative_split='all', same=False, thr_percent=2.5 | 44.55% | 83.49% | 50.46% | 97.87% | 41.92% | 99.31% | 68.58% |
 
-
-[0.5616272  0.90291903 0.57505843 0.98082092 0.51517785 0.9928604 0.65222069] for LRSSL
+[0.44557967 0.83493664 0.50460611 0.97872139 0.41927776 0.99318614
+ 0.68586446]

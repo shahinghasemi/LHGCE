@@ -48,11 +48,6 @@ AGGREGATOR_CONV = args.agg_conv
 AGGREGATOR_HETERO = args.agg_hetero
 
 def main():
-    data, totalInteractions, totalNonInteractions, INTERACTIONS_NUMBER, NONINTERACTIONS_NUMBER = dataloader(DATASET)
-
-    selectedInteractions, selectedNonInteractions = splitter(SAME_NEGATIVE, totalInteractions, totalNonInteractions, INTERACTIONS_NUMBER, NONINTERACTIONS_NUMBER)
-    
-    interactionsIndicesFolds, nonInteractionsIndicesFolds = foldify(selectedInteractions, selectedNonInteractions)
 
     metrics = np.zeros(7)
 
@@ -63,6 +58,12 @@ def main():
         customRange = range(FOLDS)
         divider = FOLDS
     for k in customRange:
+        data, totalInteractions, totalNonInteractions, INTERACTIONS_NUMBER, NONINTERACTIONS_NUMBER = dataloader(DATASET)
+
+        selectedInteractions, selectedNonInteractions = splitter(SAME_NEGATIVE, totalInteractions, totalNonInteractions, INTERACTIONS_NUMBER, NONINTERACTIONS_NUMBER)
+        
+        interactionsIndicesFolds, nonInteractionsIndicesFolds = foldify(selectedInteractions, selectedNonInteractions)
+
         messageEdgesIndex, trainSuperVisionEdgesIndex, testSuperVisionEdgesIndex = splitEdgesBasedOnFolds(interactionsIndicesFolds, k)
 
         testNonEdgesIndex = nonInteractionsIndicesFolds[k]
