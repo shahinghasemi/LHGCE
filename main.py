@@ -1,5 +1,5 @@
 import torch_geometric.transforms as T
-from prepareData import splitter, foldify, splitEdgesBasedOnFolds, extractId
+from prepareData import splitter, foldify, splitEdgesBasedOnFolds, metadata
 import torch
 import argparse
 import torch_geometric
@@ -50,6 +50,10 @@ AGGREGATOR_HETERO = args.agg_hetero
 def main():
 
     metrics = np.zeros(7)
+    totalInteractions, totalNonInteractions, INTERACTIONS_NUMBER, NONINTERACTIONS_NUMBER = metadata(DATASET)
+
+    selectedInteractions, selectedNonInteractions = splitter(SAME_NEGATIVE, totalInteractions, totalNonInteractions, INTERACTIONS_NUMBER, NONINTERACTIONS_NUMBER)
+    interactionsIndicesFolds, nonInteractionsIndicesFolds = foldify(selectedInteractions, selectedNonInteractions)
 
     if FOLD != -1:
         customRange = range(FOLD, FOLD+1, 1) 
@@ -57,13 +61,9 @@ def main():
     else:
         customRange = range(FOLDS)
         divider = FOLDS
+
     for k in customRange:
-        data, totalInteractions, totalNonInteractions, INTERACTIONS_NUMBER, NONINTERACTIONS_NUMBER = dataloader(DATASET)
-
-        selectedInteractions, selectedNonInteractions = splitter(SAME_NEGATIVE, totalInteractions, totalNonInteractions, INTERACTIONS_NUMBER, NONINTERACTIONS_NUMBER)
-        
-        interactionsIndicesFolds, nonInteractionsIndicesFolds = foldify(selectedInteractions, selectedNonInteractions)
-
+        data = dataloader(DATASET)
         messageEdgesIndex, trainSuperVisionEdgesIndex, testSuperVisionEdgesIndex = splitEdgesBasedOnFolds(interactionsIndicesFolds, k)
 
         testNonEdgesIndex = nonInteractionsIndicesFolds[k]

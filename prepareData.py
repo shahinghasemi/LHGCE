@@ -101,6 +101,29 @@ def makePosEdgeIndex(dataset, name, delimiter=',', percent = 100, dataframe=Fals
     return edgeIndex
 
 
+def metadata(dataset):
+    if dataset == 'LAGCN' or dataset == 'LAGCN-therapeutic':
+        numbers = {
+            'drug': 269,
+            'disease': 598,
+            'pathway': 258,
+            'enzyme': 108,
+            'target': 529,
+            'structure': 881,
+            'interactions': 18416 if dataset == 'LAGCN' else 6244,
+            'nonInteractions': 142446 if dataset == 'LAGCN' else 154618,
+        }
+        if dataset == 'LAGCN':
+            drugDisease = np.loadtxt('./data/' + 'LAGCN' + '/drug_disease.csv', delimiter=',')
+            totalInteractions = np.array(np.mat(np.where(drugDisease == 1)).T) #(18416, 2)
+            totalNonInteractions = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
+        else:
+            drugDisease = np.loadtxt('./data/' + 'LAGCN' + '/therapeutic.txt', delimiter=' ')
+            totalInteractions = np.array(np.mat(np.where(drugDisease == 1)).T) #(6244, 2)
+            totalNonInteractions = np.array(np.mat(np.where(drugDisease < 1)).T) #(154618, 2)
+
+        return totalInteractions, totalNonInteractions, numbers.get('interactions'), numbers.get('nonInteractions')
+
 def prepareDrugData(featureList, embeddingMethod):
     featureMatrixDic = {}
     finalDic = {}

@@ -44,15 +44,6 @@ def dataloader(dataset):
             'nonInteractions': 142446 if dataset == 'LAGCN' else 154618,
         }
 
-        if dataset == 'LAGCN':
-            drugDisease = np.loadtxt('./data/' + 'LAGCN' + '/drug_disease.csv', delimiter=',')
-            totalInteractions = np.array(np.mat(np.where(drugDisease == 1)).T) #(18416, 2)
-            totalNonInteractions = np.array(np.mat(np.where(drugDisease == 0)).T) #(142446, 2)
-        else:
-            drugDisease = np.loadtxt('./data/' + 'LAGCN' + '/therapeutic.txt', delimiter=' ')
-            totalInteractions = np.array(np.mat(np.where(drugDisease == 1)).T) #(6244, 2)
-            totalNonInteractions = np.array(np.mat(np.where(drugDisease < 1)).T) #(154618, 2)
-
         data['drug'].x = torch.eye(numbers.get('drug'), dtype=torch.float)
         data['disease'].x = torch.tensor(np.loadtxt('./data/LAGCN/dis_sim.csv', delimiter=','), dtype=torch.float)        
         data['pathway'].x = torch.eye(numbers.get('pathway'), dtype=torch.float)
@@ -97,4 +88,4 @@ def dataloader(dataset):
         data['disease', 'edge', 'pathway'].edge_index = makePosEdgeIndex(dataset, 'disease-pathways.txt', ' ')
         data['disease', 'edge', 'target'].edge_index = makePosEdgeIndex(dataset, 'disease-targets.txt', ' ')
 
-    return data, totalInteractions, totalNonInteractions, numbers.get('interactions'), numbers.get('nonInteractions')
+    return data
