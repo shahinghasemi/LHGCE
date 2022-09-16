@@ -28,6 +28,7 @@ parser.add_argument('--negative-split', help='how negatives should be involved i
 parser.add_argument('--agg-lin', help='aggregator function for linear layers', type=str)
 parser.add_argument('--agg-conv', help='aggregator function for conv layers', type=str)
 parser.add_argument('--agg-hetero', help='aggregator function for hetero layers', type=str)
+parser.add_argument('--encoder', help='encoder', type=str)
 
 args = parser.parse_args()
 print(args)
@@ -46,6 +47,7 @@ FOLD = args.fold
 AGGREGATOR_LIN = args.agg_lin
 AGGREGATOR_CONV = args.agg_conv
 AGGREGATOR_HETERO = args.agg_hetero
+ENCODER = args.encoder
 
 def main():
 
@@ -108,7 +110,8 @@ def main():
         data = T.NormalizeFeatures()(data)
         print('hetero data: ', data)
 
-        model = Model(data=data, neurons=NEURONS, layers=LAYERS, aggregator_lin=AGGREGATOR_LIN, aggregator_conv=AGGREGATOR_CONV, aggregator_hetero=AGGREGATOR_HETERO)
+        model = Model(data=data, neurons=NEURONS, layers=LAYERS, aggregator_lin=AGGREGATOR_LIN, aggregator_conv=AGGREGATOR_CONV, aggregator_hetero=AGGREGATOR_HETERO, encoder=ENCODER)
+        print('model: ', model)
         optimizer = torch.optim.Adam(model.parameters(), LEARNING_RATE)
 
         # Due to lazy initialization, we need to run one model step so the number
