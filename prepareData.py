@@ -92,7 +92,7 @@ def makePosEdgeIndex(dataset, name, delimiter=',', percent = 100, dataframe=Fals
 
     result = np.where(matrix == 1)
     edgeIndex = [[], []]
-    choseIndex = np.random.choice(result[0].shape[0], int(result[0].shape[0] * percent / 100))
+    choseIndex = np.random.choice(result[0].shape[0], int(result[0].shape[0] * percent / 100), replace=False)
     for index in choseIndex:
         edgeIndex[0].append(result[0][index]) 
         edgeIndex[1].append(result[1][index])
