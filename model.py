@@ -12,10 +12,8 @@ class GNNEncoder(torch.nn.Module):
             self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.SumAggregation()) for i in range(self.layers)])
         elif aggregator == 'var':
             self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.VarAggregation()) for i in range(self.layers)])
-        elif aggregator == 'max':
-            self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.MaxAggregation()) for i in range(self.layers)])
-        elif aggregator == 'mul':
-            self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.MulAggregation()) for i in range(self.layers)])
+        elif aggregator == 'mean':
+            self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.MeanAggregation()) for i in range(self.layers)])
         elif aggregator == 'std':
             self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.StdAggregation()) for i in range(self.layers)])
 
