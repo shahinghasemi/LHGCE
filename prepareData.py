@@ -121,8 +121,21 @@ def metadata(dataset):
             drugDisease = np.loadtxt('./data/' + 'LAGCN' + '/therapeutic.txt', delimiter=' ')
             totalInteractions = np.array(np.mat(np.where(drugDisease == 1)).T) #(6244, 2)
             totalNonInteractions = np.array(np.mat(np.where(drugDisease < 1)).T) #(154618, 2)
+    
+    elif dataset == 'deepDR':
+        numbers = {
+            'drug': 1519,
+            'disease': 1229,
+            'protein': 1025,
+            'sideEffect': 12904,
+            'interactions': 6677,
+            'nonInteractions': 1860174,
+        }
+        drugDisease = np.loadtxt('./data/' + 'deepDR' + '/drugDisease.txt', delimiter='\t')
+        totalInteractions = np.array(np.mat(np.where(drugDisease == 1)).T) #(6677, 2)
+        totalNonInteractions = np.array(np.mat(np.where(drugDisease == 0)).T) #(1860174, 2)
 
-        return totalInteractions, totalNonInteractions, numbers.get('interactions'), numbers.get('nonInteractions')
+    return totalInteractions, totalNonInteractions, numbers.get('interactions'), numbers.get('nonInteractions')
 
 def prepareDrugData(featureList, embeddingMethod):
     featureMatrixDic = {}

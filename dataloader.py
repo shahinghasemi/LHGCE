@@ -55,6 +55,24 @@ def dataloader(dataset):
         data['drug', 'edge', 'enzyme'].edge_index = makePosEdgeIndex('LAGCN', 'drug_enzyme.txt', ' ')
         data['drug', 'edge', 'target'].edge_index = makePosEdgeIndex('LAGCN', 'drug_target.txt', ' ')
         data['drug', 'edge', 'structure'].edge_index = makePosEdgeIndex('LAGCN', 'drug_structure.txt', ' ')
+    
+    elif dataset == 'deepDR':
+        numbers = {
+            'drug': 1519,
+            'disease': 1229,
+            'protein': 1025,
+            'sideEffect': 12904,
+            'interactions': 6677,
+            'nonInteractions': 1860174,
+        }
+
+        data['drug'].x = torch.eye(numbers.get('drug'), dtype=torch.float)
+        data['disease'].x = torch.eye(numbers.get('disease'), dtype=torch.float)
+        data['protein'].x = torch.eye(numbers.get('protein'), dtype=torch.float)
+        data['sideEffect'].x = torch.eye(numbers.get('sideEffect'), dtype=torch.float)
+
+        data['drug', 'edge', 'protein'].edge_index = makePosEdgeIndex('deepDR', 'drugProtein.txt', '\t')
+        data['drug', 'edge', 'sideEffect'].edge_index = makePosEdgeIndex('deepDR', 'drugsideEffect.txt', '\t')
 
     elif dataset == 'MGATRx':
         numbers = {
