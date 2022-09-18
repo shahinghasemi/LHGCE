@@ -1,7 +1,7 @@
 from metrics import calculateMetric
 from torch_geometric.nn import SAGEConv, to_hetero, aggr
 import torch
-from torch.nn import Linear, ModuleList, Sequential, ReLU, Dropout
+from torch.nn import Linear, ModuleList, Sequential, ReLU
 from torch.nn.functional import dropout
 
 class GNNEncoder(torch.nn.Module):
@@ -16,16 +16,8 @@ class GNNEncoder(torch.nn.Module):
             self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.MaxAggregation()) for i in range(self.layers)])
         elif aggregator == 'mul':
             self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.MulAggregation()) for i in range(self.layers)])
-        elif aggregator == 'min':
-            self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.MinAggregation()) for i in range(self.layers)])
-        elif aggregator == 'power-mean':
-            self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.PowerMeanAggregation()) for i in range(self.layers)])
         elif aggregator == 'std':
             self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.StdAggregation()) for i in range(self.layers)])
-        elif aggregator == 'softmax':
-            self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.SoftmaxAggregation()) for i in range(self.layers)])
-        elif aggregator == 'softmax-learn':
-            self.convs = ModuleList([SAGEConv((-1, -1), neurons, normalize=True, aggr=aggr.SoftmaxAggregation(learn=True)) for i in range(self.layers)])
 
     def forward(self, x, edge_index):
         for i, l in enumerate(self.convs):
@@ -33,7 +25,6 @@ class GNNEncoder(torch.nn.Module):
                 x = self.convs[i](x, edge_index)
             else:
                 x = self.convs[i](x, edge_index).relu()
-                x = dropout(x, p=0.25)
         return x
 
 
@@ -44,14 +35,12 @@ class Linears(torch.nn.Module):
         if aggregator == 'concatenate':
             self.linear = Sequential(
                 Linear(2 * neurons, neurons),
-                Dropout(p=0.25),
                 ReLU(),
                 Linear(neurons, 1)
             )
         elif aggregator == 'mean' or aggregator == 'sum' or aggregator == 'mul':
             self.linear = Sequential(
                 Linear(neurons, neurons),
-                Dropout(p=0.25),
                 ReLU(),
                 Linear(neurons, 1)
             )

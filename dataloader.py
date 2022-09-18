@@ -45,7 +45,8 @@ def dataloader(dataset):
         }
 
         data['drug'].x = torch.eye(numbers.get('drug'), dtype=torch.float)
-        data['disease'].x = torch.tensor(np.loadtxt('./data/LAGCN/dis_sim.csv', delimiter=','), dtype=torch.float)        
+        # data['disease'].x = torch.tensor(np.loadtxt('./data/LAGCN/dis_sim.csv', delimiter=','), dtype=torch.float)        
+        data['disease'].x = torch.eye(numbers.get('disease'), dtype=torch.float)
         data['pathway'].x = torch.eye(numbers.get('pathway'), dtype=torch.float)
         data['enzyme'].x = torch.eye(numbers.get('enzyme'), dtype=torch.float)
         data['target'].x = torch.eye(numbers.get('target'), dtype=torch.float)
